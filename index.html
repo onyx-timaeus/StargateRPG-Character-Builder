@@ -8,53 +8,69 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌌</text></svg>">
+    <style>
+        /* Suppress Tailwind warning in console */
+        #root { min-height: 100vh; }
+    </style>
 </head>
 <body>
     <div id="root"></div>
     <script type="text/babel">
-        import React, { useState, useEffect } from 'react';
-import { ChevronDown, User, Shield, Heart, Zap, Brain, Target, Activity, Download, AlertCircle, Info, Sparkles } from 'lucide-react';
+        const { useState, useEffect } = React;
+        
+        // Icon components (simplified versions)
+        const ChevronDown = () => <span>▼</span>;
+        const User = () => <span>👤</span>;
+        const Shield = () => <span>🛡️</span>;
+        const Heart = () => <span>❤️</span>;
+        const Zap = () => <span>⚡</span>;
+        const Brain = () => <span>🧠</span>;
+        const Target = () => <span>🎯</span>;
+        const Activity = () => <span>📊</span>;
+        const Download = () => <span>⬇️</span>;
+        const AlertCircle = () => <span>⚠️</span>;
+        const Info = () => <span>ℹ️</span>;
+        const Sparkles = () => <span>✨</span>;
 
-const StargateCharacterEditor = () => {
-  // Character state
-  const [character, setCharacter] = useState({
-    name: '',
-    race: '',
-    subrace: '',
-    abilityChoice: '', // For races with ability score choices
-    origins: [],
-    originChoices: {}, // Store specific choices for origins (e.g., weapon/armor for Military)
-    raceChoices: {}, // Store specific choices for races (e.g., skill/weapon for Abydonian)
-    class: '',
-    level: 1,
-    classFeats: [], // Store feat selections as array
-    abilityScoreImprovements: {}, // Store ASI choices at level 4
-    abilityScores: {
-      strength: 10,
-      dexterity: 10,
-      constitution: 10,
-      intelligence: 10,
-      wisdom: 10,
-      charisma: 10
-    },
-    hp: 0,
-    maxHp: 0,
-    determinationPoints: 0,
-    armorClass: 10,
-    speed: 6,
-    initiative: 0,
-    moxie: 0,
-    proficiencies: {
-      armor: [],
-      weapons: [],
-      tools: [],
-      saves: [],
-      skills: []
-    }
-  });
+        const StargateCharacterEditor = () => {
+            // Character state
+            const [character, setCharacter] = useState({
+                name: '',
+                race: '',
+                subrace: '',
+                abilityChoice: '',
+                origins: [],
+                originChoices: {},
+                raceChoices: {},
+                class: '',
+                level: 1,
+                classFeats: [],
+                abilityScoreImprovements: {},
+                abilityScores: {
+                    strength: 10,
+                    dexterity: 10,
+                    constitution: 10,
+                    intelligence: 10,
+                    wisdom: 10,
+                    charisma: 10
+                },
+                hp: 0,
+                maxHp: 0,
+                determinationPoints: 0,
+                armorClass: 10,
+                speed: 6,
+                initiative: 0,
+                moxie: 0,
+                proficiencies: {
+                    armor: [],
+                    weapons: [],
+                    tools: [],
+                    saves: [],
+                    skills: []
+                }
+            });
 
-  // Complete race data matching official Stargate RPG rules
+// Complete race data matching official Stargate RPG rules
   const races = {
     'Human': {
       subraces: {
@@ -2326,12 +2342,19 @@ ${asiList || 'None selected'}
     </div>
   );
 };
-
-export default StargateCharacterEditor;
         
         // After pasting the component, add this at the bottom:
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<StargateCharacterEditor />);
+    </script>
+</body>
+</html>
+
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(StargateCharacterEditor));
     </script>
 </body>
 </html>
