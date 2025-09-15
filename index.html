@@ -3,46 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stargate RPG Character Editor</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <title>Stargate RPG Character Builder</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom styles for better appearance */
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-        }
-        
-        /* Simple icon replacements using CSS */
-        .icon {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            background-size: contain;
-            vertical-align: middle;
-        }
-        
-        .icon-target::before { content: "🎯"; }
-        .icon-user::before { content: "👤"; }
-        .icon-shield::before { content: "🛡️"; }
-        .icon-heart::before { content: "❤️"; }
-        .icon-zap::before { content: "⚡"; }
-        .icon-brain::before { content: "🧠"; }
-        .icon-activity::before { content: "📈"; }
-        .icon-download::before { content: "💾"; }
-        .icon-alert::before { content: "⚠️"; }
-        .icon-info::before { content: "ℹ️"; }
-        .icon-sparkles::before { content: "✨"; }
-        .icon-chevron-down::before { content: "▼"; }
-    </style>
 </head>
 <body>
     <div id="root"></div>
-
+    
     <script type="text/babel">
         const { useState, useEffect } = React;
+        const { ChevronDown, User, Shield, Heart, Footprints, Brain, Target, Activity, Download, AlertCircle, Sparkles, Award, BookOpen } = lucide;
 
         const StargateCharacterEditor = () => {
             // Character state
@@ -79,10 +52,87 @@
                     tools: [],
                     saves: [],
                     skills: []
-                }
+                },
+                bonusFeats: []
             });
 
-            // Complete race data matching official Stargate RPG rules
+            const [showClassFeats, setShowClassFeats] = useState(true);
+            const [showClassAbilities, setShowClassAbilities] = useState(true);
+            const [attackSpecialistChoice, setAttackSpecialistChoice] = useState('');
+
+            // Field Hack feats for Scout class
+            const fieldHackFeats = [
+                { name: 'Camouflage', requirements: 'Stealth', description: 'Create camouflage granting advantage on Stealth in natural terrain' },
+                { name: 'Camp Security', requirements: 'Perception', description: 'Set up camp alarms, advantage on Perception during rest' },
+                { name: 'Foraging', requirements: 'Survival', description: 'Find food/water for 1d4+Wis mod people per day' },
+                { name: 'Hide Tracks', requirements: 'Stealth', description: 'Increase DC to track your party by +5' },
+                { name: 'Ranger Tricks', requirements: 'Nature', description: 'Leave false trails, create natural traps (1d6 damage)' },
+                { name: 'Ration Optimization', requirements: 'Survival', description: 'Make rations last 50% longer' },
+                { name: 'Rope Tricks', requirements: 'Athletics', description: 'Advantage on Athletics checks involving ropes and climbing' },
+                { name: 'Tracking', requirements: 'Survival', description: 'Track creatures, determine numbers and time passed' },
+                { name: 'Xenosurvival', requirements: 'Science', description: 'Identify alien flora/fauna as safe or dangerous' }
+            ];
+
+            // Class-specific feats by type
+            const classFeatsByType = {
+                inspiration: [
+                    { name: 'Calm and Collected', description: 'During long rest, choose Int/Wis/Cha. Inspired characters gain advantage on chosen save' },
+                    { name: 'Clear Focus', description: 'During long rest, choose a skill. Inspired characters gain advantage on that skill' },
+                    { name: 'Coordinated Fire', description: 'After you hit, bonus action to grant inspired ally advantage on next attack vs same target' },
+                    { name: 'Defensive Motivation', description: 'Inspired characters gain +1 AC' },
+                    { name: 'Enduring Inspirations', description: 'At combat start, inspired characters gain tension die worth of Inspire HP' },
+                    { name: 'Grim Resolve', description: 'When inspired character loses last Inspire HP, gain resistance to physical damage until next turn' },
+                    { name: 'Hard Days Night', description: 'Inspired characters reduce exhaustion from environment/exertion by 1 level (min 1)' },
+                    { name: 'Quippy Comebacks', description: 'Once per Diplomatic Function, inspired characters halve DP loss from failed checks' },
+                    { name: 'Skillful Explanations', description: 'Once per short rest, allow inspired character to re-roll failed skill check you are proficient in' }
+                ],
+                modification: [
+                    { name: 'Armorer', description: 'During long rest, grant one armor +1 AC until next rest' },
+                    { name: 'Chem Thrower', description: 'During long rest, grant line/cone weapon +5m range' },
+                    { name: 'Comms Tech', description: 'Team radio range 20km (not 5km), balloon duration 15d6 hours' },
+                    { name: 'Grenadier', description: 'Your grenades deal +1d6 damage' },
+                    { name: 'Longarm Calibrations', description: 'During long rest, grant longarm +1d4 to attack at long range' },
+                    { name: 'Minefield Expert', description: 'Bury explosives as mines, advantage to spot mines' },
+                    { name: 'Montage', description: 'Reduce R&D successes needed by half proficiency bonus' },
+                    { name: 'Percussive Maintenance', description: 'Machines you grant temp HP to heal +1d6 additional temp HP' },
+                    { name: 'Sidearm Calibrations', description: 'During long rest, grant sidearm +1 to attack and damage' }
+                ],
+                procedure: [
+                    { name: 'Biohazard Disposal', description: 'Team proficient in Constitution saves vs disease/toxins/viruses' },
+                    { name: 'Controlled Stimulants', description: 'Use Med Kit to heal 1d4 exhaustion (once per rest per character)' },
+                    { name: 'Crash Training', description: 'Use Med Kit to revive dead character (DC 25 Medicine, once per round)' },
+                    { name: 'Embolism', description: 'Melee attack deals 1d3 Constitution damage' },
+                    { name: 'Improvised Medicine', description: 'Heal without Med Kit but target not proficient with' },
+                    { name: 'Pharmaceuticals', description: 'Heal 1d4 Int/Wis/Cha damage during short rest' },
+                    { name: 'Sedatives', description: 'Melee attack causes unconsciousness (Con save or 1d6 fatigue levels)' },
+                    { name: 'Urgent Care', description: 'Replace all healing dice rolled with tension dice' },
+                    { name: 'Vital Organ Trauma', description: 'Add Wisdom modifier to critical hit damage' }
+                ],
+                discovery: [
+                    { name: 'A Moments Thought', description: 'During rest, spend Eureka to re-roll failed Int/Wis check' },
+                    { name: 'Archaeologist', description: 'Action to spend Eureka and find secret rooms, advantage on finding hidden architecture' },
+                    { name: 'Astronomer', description: 'Bonus action to reduce Stargate activation by 1 round per Eureka' },
+                    { name: 'Biologist', description: 'Action to spend Eureka points to heal 1d6 per point' },
+                    { name: 'Chemist', description: 'Research Kit ranged attack deals 1d6 acid per Eureka (increases with level)' },
+                    { name: 'Geologist', description: 'Reaction to spend Eureka and negate natural cover' },
+                    { name: 'Hyper-Focus', description: 'Spend Eureka to add tension die to Int/Wis check' },
+                    { name: 'Physicist', description: 'Spend Eureka to increase weapon range by 50%' },
+                    { name: 'Social Sciences', description: 'Gain 1 Eureka when losing Determination Points' }
+                ],
+                tactic: [
+                    { name: 'Ambush', description: 'Team gains advantage on first melee attack after rest' },
+                    { name: 'Assault Coordination', description: 'Next ranged attack by teammate after you hit deals +1d6' },
+                    { name: 'Coordinated Response', description: 'Team can use your initiative result' },
+                    { name: 'Defensive Posture', description: 'Allies within 2m gain +2 AC' },
+                    { name: 'Distracting Attacks', description: 'Target has disadvantage vs chosen ally not within 2m' },
+                    { name: 'Hit and Run', description: 'Bonus action to let ally Disengage' },
+                    { name: 'Overwatchers', description: '90° overwatch field (not 45°), make 2 attacks' },
+                    { name: 'Response Shot', description: 'Once per encounter, reaction attack when enemy attacks ally' },
+                    { name: 'Rush', description: 'Bonus action to let ally Dash' }
+                ]
+            };
+
+            // Complete race data
             const races = {
                 'Human': {
                     subraces: {
@@ -243,40 +293,7 @@
                 }
             };
 
-            // Helper function to describe proficiencies for preview
-            const getProficiencyDescription = (proficiencies) => {
-                const descriptions = [];
-
-                if (proficiencies?.skills) {
-                    if (proficiencies.skills.type === 'choice') {
-                        descriptions.push(`Choose ${proficiencies.skills.count} skill${proficiencies.skills.count > 1 ? 's' : ''}`);
-                    } else if (proficiencies.skills.type === 'mixed') {
-                        const fixedSkills = proficiencies.skills.fixed.join(', ');
-                        descriptions.push(`${fixedSkills} (fixed)`);
-                        if (proficiencies.skills.additionalChoice) {
-                            descriptions.push(`Choose ${proficiencies.skills.additionalChoice.count} additional skill${proficiencies.skills.additionalChoice.count > 1 ? 's' : ''}`);
-                        }
-                    }
-                }
-
-                if (proficiencies?.weapons) {
-                    if (proficiencies.weapons.type === 'choice') {
-                        descriptions.push(`Choose ${proficiencies.weapons.count} weapon proficiency`);
-                    } else if (proficiencies.weapons.type === 'fixed') {
-                        descriptions.push(`${proficiencies.weapons.list.join(', ')} (fixed)`);
-                    }
-                }
-
-                if (proficiencies?.armor) {
-                    if (proficiencies.armor.type === 'fixed') {
-                        descriptions.push(`${proficiencies.armor.list.join(', ')} (fixed)`);
-                    }
-                }
-
-                return descriptions;
-            };
-
-            // Class data
+            // Fixed Class data
             const classes = {
                 'Diplomat': {
                     hitDie: 8,
@@ -375,24 +392,27 @@
                     }
                 },
                 'Scout': {
-                    hitDie: 8,
-                    hpPerLevel: 5,
-                    determinationBonus: 2,
+                    hitDie: 10,
+                    hpPerLevel: 6,
+                    determinationBonus: 1,
                     proficiencies: {
                         armor: ['Light Armor'],
-                        weapons: ['Common Weapons', 'Sidearms', 'Longarms', 'Shotguns', 'Sniper Rifles'],
-                        tools: ['Camo Kit'],
-                        saves: ['Dexterity', 'Wisdom'],
-                        skills: { choose: 4, from: ['Acrobatics', 'Animal Handling', 'Athletics', 'Investigation', 'Nature', 'Perception', 'Sleight of Hand', 'Stealth', 'Survival'] }
+                        weapons: ['Common Weapons', 'Martial Arts', 'Bows', 'Sidearms', 'Longarms'],
+                        tools: ['Camo Kit', 'Explosives'],
+                        saves: ['Constitution', 'Dexterity'],
+                        skills: ['Perception', 'Stealth', 'Survival']
                     },
                     abilities: {
-                        1: ['Hunter\'s Quarry (mark target for +1d6 damage)', 'Sneak Attack (+1d6 damage with advantage)'],
-                        2: ['Swift Hunter (hide as bonus action from quarry)', 'Expertise (double proficiency for 2 skills)'],
+                        1: ['Survivalist (resistance to environmental damage)', 'Choose Field Hack feat'],
+                        2: ['Vanguard (+1d6 damage within 5m)', 'Trap Rigging (set traps as action)'],
                         3: ['Uncanny Dodge (reaction for resistance)', 'Scout\'s Cunning (bonus action dash/disengage/hide)'],
-                        4: ['Ability Score Improvement'],
+                        4: ['Ability Score Improvement', 'Choose 2nd Field Hack feat'],
                         5: ['Evasion (half damage on Dex saves)']
                     },
-                    featChoices: {}
+                    featChoices: {
+                        1: { type: 'fieldHack', count: 1 },
+                        4: { type: 'fieldHack', count: 1 }
+                    }
                 },
                 'Soldier': {
                     hitDie: 10,
@@ -419,66 +439,269 @@
                 }
             };
 
-            // Feat definitions with their bonuses
-            const feats = {
-                inspiration: [
-                    { name: 'Calm and Collected', description: 'During long rest, choose Int/Wis/Cha. Inspired characters gain advantage on chosen save' },
-                    { name: 'Clear Focus', description: 'During long rest, choose a skill. Inspired characters gain advantage on that skill' },
-                    { name: 'Coordinated Fire', description: 'After you hit, bonus action to grant inspired ally advantage on next attack vs same target' },
-                    { name: 'Defensive Motivation', description: 'Inspired characters gain +1 AC' },
-                    { name: 'Enduring Inspirations', description: 'At combat start, inspired characters gain tension die worth of Inspire HP' },
-                    { name: 'Grim Resolve', description: 'When inspired character loses last Inspire HP, gain resistance to physical damage until next turn' },
-                    { name: 'Hard Day\'s Night', description: 'Inspired characters reduce exhaustion from environment/exertion by 1 level (min 1)' },
-                    { name: 'Quippy Comebacks', description: 'Once per Diplomatic Function, inspired characters halve DP loss from failed checks' },
-                    { name: 'Skillful Explanations', description: 'Once per short rest, allow inspired character to re-roll failed skill check you\'re proficient in' }
+            // Origins data
+            const origins = {
+                biome: [
+                    {
+                        name: 'Lunar',
+                        attribute: 'Dexterity +1',
+                        ability: 'Eager Astronomer: Advantage on Science checks pertaining to astronomy'
+                    },
+                    {
+                        name: 'Arboreal',
+                        attribute: 'Strength +1',
+                        ability: 'Natural Climber: Climb speed of 6m'
+                    },
+                    {
+                        name: 'Mountainous',
+                        attribute: 'Strength +1',
+                        ability: 'Vertical Drop: Half falling damage'
+                    },
+                    {
+                        name: 'Artificial',
+                        attribute: 'Wisdom +1',
+                        ability: 'Life or Death Repairs: Advantage on engineering when failure would deal damage'
+                    },
+                    {
+                        name: 'Oceanic',
+                        attribute: 'Wisdom +1',
+                        ability: 'Gifted Swimmer: Swim speed of 6m'
+                    },
+                    {
+                        name: 'Desert',
+                        attribute: 'Charisma +1',
+                        ability: 'Heat Acclimated: Resistance to fire damage'
+                    },
+                    {
+                        name: 'Rainforest',
+                        attribute: 'Charisma +1',
+                        ability: 'Tropics Adept: No disadvantage from rain or fog'
+                    },
+                    {
+                        name: 'Grasslands',
+                        attribute: 'Constitution +1',
+                        ability: 'Natural Sprinter: +1m movement speed'
+                    },
+                    {
+                        name: 'Starship',
+                        attribute: 'Dexterity +1',
+                        ability: 'Void Adept: Use Wis for Science checks'
+                    },
+                    {
+                        name: 'Terraformed',
+                        attribute: 'Intelligence +1',
+                        ability: 'Strange World: 1/day reaction for advantage on save'
+                    },
+                    {
+                        name: 'Swamp',
+                        attribute: 'Wisdom +1',
+                        ability: 'Patient Hunter: Use Wis for Stealth checks'
+                    },
+                    {
+                        name: 'Toxic',
+                        attribute: 'Constitution +1',
+                        ability: 'Toxic Resistance: Resist poison or necrotic (choose one)'
+                    },
+                    {
+                        name: 'Urban',
+                        attribute: 'Intelligence +1',
+                        ability: 'Melting Pot: Use Cha for Culture checks'
+                    },
+                    {
+                        name: 'Tundra',
+                        attribute: 'Constitution +1',
+                        ability: 'Cold Acclimated: Resistance to cold damage'
+                    },
+                    {
+                        name: 'Volcanic',
+                        attribute: 'Strength +1',
+                        ability: 'Heat Acclimated: Resistance to fire damage'
+                    },
+                    {
+                        name: 'Subterranean',
+                        attribute: 'Dexterity +1',
+                        ability: 'Improved Vision: Dim light counts as bright'
+                    }
                 ],
-                modification: [
-                    { name: 'Armorer', description: 'During long rest, grant one armor +1 AC until next rest' },
-                    { name: 'Chem Thrower', description: 'During long rest, grant line/cone weapon +5m range' },
-                    { name: 'Comms Tech', description: 'Team radio range 20km (not 5km), balloon duration 15d6 hours' },
-                    { name: 'Grenadier', description: 'Your grenades deal +1d6 damage' },
-                    { name: 'Longarm Calibrations', description: 'During long rest, grant longarm +1d4 to attack at long range' },
-                    { name: 'Minefield Expert', description: 'Bury explosives as mines, advantage to spot mines' },
-                    { name: 'Montage', description: 'Reduce R&D successes needed by half proficiency bonus' },
-                    { name: 'Percussive Maintenance', description: 'Machines you grant temp HP to heal +1d6 additional temp HP' },
-                    { name: 'Sidearm Calibrations', description: 'During long rest, grant sidearm +1 to attack and damage' }
+                background: [
+                    {
+                        name: 'Enforcement',
+                        proficiency: 'Intimidation',
+                        ability: 'Air of Authority: Others have disadvantage to intimidate you'
+                    },
+                    {
+                        name: 'Aviator',
+                        proficiency: 'Pilot',
+                        ability: 'Crash Landing: Resistance to damage when vehicle crashes'
+                    },
+                    {
+                        name: 'Driver',
+                        proficiency: 'Animal Handling',
+                        ability: 'Speedster: Vehicles/animals you control gain +1 AC'
+                    },
+                    {
+                        name: 'Enslaved',
+                        proficiency: { type: 'choice', options: ['Tool'] },
+                        ability: 'Friend to Toil: Suffer 1 less exhaustion level (min 1)'
+                    },
+                    {
+                        name: 'Former Host',
+                        proficiency: 'None',
+                        ability: 'Naquadah Blooded: Can use Goa\'uld tech, advantage vs symbiotes'
+                    },
+                    {
+                        name: 'Entertainer',
+                        proficiency: 'Performance',
+                        ability: 'Zeitgeist: Use Cha for art/performance understanding'
+                    },
+                    {
+                        name: 'Freedom Fighter',
+                        proficiency: 'Stealth',
+                        ability: 'Last Resorts: Disadvantage on Moxie, advantage on Initiative'
+                    },
+                    {
+                        name: 'Healer',
+                        proficiency: 'Medicine',
+                        ability: 'Soothe: Team heals +Prof bonus on rest'
+                    },
+                    {
+                        name: 'Military',
+                        proficiency: { type: 'choice', options: ['Weapon', 'Armor'] },
+                        ability: 'Drills: +1 HP per level'
+                    },
+                    {
+                        name: 'Herdsman',
+                        proficiency: 'Animal Handling',
+                        ability: 'Beastfriend: Use Cha instead of Wis for Animal Handling'
+                    },
+                    {
+                        name: 'Preservationist',
+                        proficiency: 'Nature',
+                        ability: 'Eye for Nature: Advantage on checks to identify plants'
+                    },
+                    {
+                        name: 'Hunter/Gatherer',
+                        proficiency: 'Survival',
+                        ability: 'Irongut: Advantage vs poison'
+                    },
+                    {
+                        name: 'Politician',
+                        proficiency: 'Persuasion',
+                        ability: 'Two Faces: Use Int instead of Cha for Deception'
+                    },
+                    {
+                        name: 'Liaison',
+                        proficiency: 'Culture',
+                        ability: 'Stranger to the Land: Advantage on Cha checks to hide foreign nature'
+                    },
+                    {
+                        name: 'Refugee',
+                        proficiency: 'Athletics',
+                        ability: 'New Environments: Advantage on Athletics in unknown wilderness'
+                    },
+                    {
+                        name: 'Merchant',
+                        proficiency: 'Insight',
+                        ability: 'Efficient Logistics: +1 bulk capacity'
+                    },
+                    {
+                        name: 'Sailor',
+                        proficiency: 'Acrobatics',
+                        ability: 'Sea Legs: Advantage to maintain balance'
+                    },
+                    {
+                        name: 'Swindler',
+                        proficiency: 'Deception',
+                        ability: 'Low Profile: Use Deception for Stealth in populated areas'
+                    },
+                    {
+                        name: 'Scholar',
+                        proficiency: 'Science',
+                        ability: 'Preserve Knowledge: Advantage on Persuasion with scholars'
+                    },
+                    {
+                        name: 'Teacher',
+                        proficiency: 'Insight',
+                        ability: 'Patient Approach: 1/mission use Wis save instead of another'
+                    },
+                    {
+                        name: 'Sentry',
+                        proficiency: 'Perception',
+                        ability: 'Long Night: Ignore first night without rest'
+                    },
+                    {
+                        name: 'Wright',
+                        proficiency: 'Engineering',
+                        ability: 'Measure Twice: Half prof bonus on non-proficient tools'
+                    },
+                    {
+                        name: 'Sleuth',
+                        proficiency: 'Investigation',
+                        ability: 'The Reveal: Advantage on Persuasion to accuse wrongdoing'
+                    },
+                    {
+                        name: 'Underworld',
+                        proficiency: 'Sleight of Hand',
+                        ability: 'Black Market: Advantage contacting underworld members'
+                    },
+                    {
+                        name: 'Student',
+                        proficiency: 'Perception',
+                        ability: 'Quick Study: 1/mission use Int save instead of another'
+                    }
                 ],
-                procedure: [
-                    { name: 'Biohazard Disposal', description: 'Team proficient in Constitution saves vs disease/toxins/viruses' },
-                    { name: 'Controlled Stimulants', description: 'Use Med Kit to heal 1d4 exhaustion (once per rest per character)' },
-                    { name: 'Crash Training', description: 'Use Med Kit to revive dead character (DC 25 Medicine, once per round)' },
-                    { name: 'Embolism', description: 'Melee attack deals 1d3 Constitution damage' },
-                    { name: 'Improvised Medicine', description: 'Heal without Med Kit but target not proficient with' },
-                    { name: 'Pharmaceuticals', description: 'Heal 1d4 Int/Wis/Cha damage during short rest' },
-                    { name: 'Sedatives', description: 'Melee attack causes unconsciousness (Con save or 1d6 fatigue levels)' },
-                    { name: 'Urgent Care', description: 'Replace all healing dice rolled with tension dice' },
-                    { name: 'Vital Organ Trauma', description: 'Add Wisdom modifier to critical hit damage' }
-                ],
-                discovery: [
-                    { name: 'A Moment\'s Thought', description: 'During rest, spend Eureka to re-roll failed Int/Wis check' },
-                    { name: 'Archaeologist', description: 'Action to spend Eureka and find secret rooms, advantage on finding hidden architecture' },
-                    { name: 'Astronomer', description: 'Bonus action to reduce Stargate activation by 1 round per Eureka' },
-                    { name: 'Biologist', description: 'Action to spend Eureka points to heal 1d6 per point' },
-                    { name: 'Chemist', description: 'Research Kit ranged attack deals 1d6 acid per Eureka (increases with level)' },
-                    { name: 'Geologist', description: 'Reaction to spend Eureka and negate natural cover' },
-                    { name: 'Hyper-Focus', description: 'Spend Eureka to add tension die to Int/Wis check' },
-                    { name: 'Physicist', description: 'Spend Eureka to increase weapon range by 50%' },
-                    { name: 'Social Sciences', description: 'Gain 1 Eureka when losing Determination Points' }
-                ],
-                tactic: [
-                    { name: 'Ambush', description: 'Team gains advantage on first melee attack after rest' },
-                    { name: 'Assault Coordination', description: 'Next ranged attack by teammate after you hit deals +1d6' },
-                    { name: 'Coordinated Response', description: 'Team can use your initiative result' },
-                    { name: 'Defensive Posture', description: 'Allies within 2m gain +2 AC' },
-                    { name: 'Distracting Attacks', description: 'Target has disadvantage vs chosen ally not within 2m' },
-                    { name: 'Hit & Run', description: 'Bonus action to let ally Disengage' },
-                    { name: 'Overwatchers', description: '90° overwatch field (not 45°), make 2 attacks' },
-                    { name: 'Response Shot', description: 'Once per encounter, reaction attack when enemy attacks ally' },
-                    { name: 'Rush', description: 'Bonus action to let ally Dash' }
-                ]
+                racial: {
+                    'Human': [
+                        {
+                            name: 'Tau\'ri Military',
+                            attribute: 'None',
+                            proficiency: { type: 'choice', options: ['Martial Arts', 'Longarms', 'Heavy Armor'] },
+                            ability: 'Basic Training: Chosen proficiency from military service'
+                        }
+                    ],
+                    'Jaffa': [
+                        {
+                            name: 'Jaffa Renegade',
+                            attribute: 'Wisdom +1',
+                            ability: 'Rebel: Advantage on saves vs Goa\'uld and Jaffa'
+                        },
+                        {
+                            name: 'Student of Bra\'tac',
+                            attribute: 'Dexterity +1',
+                            ability: 'Ma\'tok Mastery: Ma\'tok gains finesse property'
+                        }
+                    ],
+                    'Aturen': [
+                        {
+                            name: 'Aturen Spiritualist',
+                            attribute: 'None',
+                            ability: 'Ritual of Life: DC 20 Culture check to resurrect'
+                        }
+                    ],
+                    'Tok\'ra': [
+                        {
+                            name: 'Tok\'ra Spy',
+                            attribute: 'Charisma +1',
+                            ability: 'Passing: Advantage on Deception as Human/Goa\'uld/Jaffa'
+                        }
+                    ],
+                    'Unas': [
+                        {
+                            name: 'Unas Alpha',
+                            attribute: 'Charisma +1',
+                            ability: 'Clan Leader: Other Unas gain advantage on saves/attacks'
+                        }
+                    ]
+                }
             };
 
-            // Available options
+            // Available skills and proficiencies lists
+            const availableTools = [
+                'Camo Kit', 'Explosives', 'Med Kit', 'Research Kit',
+                'Surgical Kit', 'Translator', 'Thieves\' Tools',
+                'Tok\'ra tunneling crystals', 'Engineering tools'
+            ];
+
             const availableSkills = [
                 'Acrobatics', 'Athletics', 'Culture', 'Deception', 'Engineering',
                 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature',
@@ -496,90 +719,56 @@
                 'Light Armor', 'Medium Armor', 'Heavy Armor', 'Shields'
             ];
 
-            const availableTools = [
-                'Camo Kit', 'Explosives', 'Med Kit', 'Research Kit',
-                'Surgical Kit', 'Translator', 'Thieves\' Tools',
-                'Tok\'ra tunneling crystals', 'Engineering tools'
-            ];
-
-            // Origins data
-            const origins = {
-                biome: [
-                    { name: 'Lunar', attribute: 'Dexterity +1', ability: 'Eager Astronomer: Advantage on Science checks pertaining to astronomy' },
-                    { name: 'Arboreal', attribute: 'Strength +1', ability: 'Natural Climber: Climb speed of 6m' },
-                    { name: 'Mountainous', attribute: 'Strength +1', ability: 'Vertical Drop: Half falling damage' },
-                    { name: 'Artificial', attribute: 'Wisdom +1', ability: 'Life or Death Repairs: Advantage on engineering when failure would deal damage' },
-                    { name: 'Oceanic', attribute: 'Wisdom +1', ability: 'Gifted Swimmer: Swim speed of 6m' },
-                    { name: 'Desert', attribute: 'Charisma +1', ability: 'Heat Acclimated: Resistance to fire damage' },
-                    { name: 'Rainforest', attribute: 'Charisma +1', ability: 'Tropics Adept: No disadvantage from rain or fog' },
-                    { name: 'Grasslands', attribute: 'Constitution +1', ability: 'Natural Sprinter: +1m movement speed' },
-                    { name: 'Starship', attribute: 'Dexterity +1', ability: 'Void Adept: Use Wis for Science checks' },
-                    { name: 'Terraformed', attribute: 'Intelligence +1', ability: 'Strange World: 1/day reaction for advantage on save' },
-                    { name: 'Swamp', attribute: 'Wisdom +1', ability: 'Patient Hunter: Use Wis for Stealth checks' },
-                    { name: 'Toxic', attribute: 'Constitution +1', ability: 'Toxic Resistance: Resist poison or necrotic (choose one)' },
-                    { name: 'Urban', attribute: 'Intelligence +1', ability: 'Melting Pot: Use Cha for Culture checks' },
-                    { name: 'Tundra', attribute: 'Constitution +1', ability: 'Cold Acclimated: Resistance to cold damage' },
-                    { name: 'Volcanic', attribute: 'Strength +1', ability: 'Heat Acclimated: Resistance to fire damage' },
-                    { name: 'Subterranean', attribute: 'Dexterity +1', ability: 'Improved Vision: Dim light counts as bright' }
-                ],
-                background: [
-                    { name: 'Enforcement', proficiency: 'Intimidation', ability: 'Air of Authority: Others have disadvantage to intimidate you' },
-                    { name: 'Aviator', proficiency: 'Pilot', ability: 'Crash Landing: Resistance to damage when vehicle crashes' },
-                    { name: 'Driver', proficiency: 'Animal Handling', ability: 'Speedster: Vehicles/animals you control gain +1 AC' },
-                    { name: 'Enslaved', proficiency: { type: 'choice', options: ['Tool'] }, ability: 'Friend to Toil: Suffer 1 less exhaustion level (min 1)' },
-                    { name: 'Former Host', proficiency: 'None', ability: 'Naquadah Blooded: Can use Goa\'uld tech, advantage vs symbiotes' },
-                    { name: 'Entertainer', proficiency: 'Performance', ability: 'Zeitgeist: Use Cha for art/performance understanding' },
-                    { name: 'Freedom Fighter', proficiency: 'Stealth', ability: 'Last Resorts: Disadvantage on Moxie, advantage on Initiative' },
-                    { name: 'Healer', proficiency: 'Medicine', ability: 'Soothe: Team heals +Prof bonus on rest' },
-                    { name: 'Military', proficiency: { type: 'choice', options: ['Weapon', 'Armor'] }, ability: 'Drills: +1 HP per level' },
-                    { name: 'Herdsman', proficiency: 'Animal Handling', ability: 'Beastfriend: Use Cha instead of Wis for Animal Handling' },
-                    { name: 'Preservationist', proficiency: 'Nature', ability: 'Eye for Nature: Advantage on checks to identify plants' },
-                    { name: 'Hunter/Gatherer', proficiency: 'Survival', ability: 'Irongut: Advantage vs poison' },
-                    { name: 'Politician', proficiency: 'Persuasion', ability: 'Two Faces: Use Int instead of Cha for Deception' },
-                    { name: 'Liaison', proficiency: 'Culture', ability: 'Stranger to the Land: Advantage on Cha checks to hide foreign nature' },
-                    { name: 'Refugee', proficiency: 'Athletics', ability: 'New Environments: Advantage on Athletics in unknown wilderness' },
-                    { name: 'Merchant', proficiency: 'Insight', ability: 'Efficient Logistics: +1 bulk capacity' },
-                    { name: 'Sailor', proficiency: 'Acrobatics', ability: 'Sea Legs: Advantage to maintain balance' },
-                    { name: 'Swindler', proficiency: 'Deception', ability: 'Low Profile: Use Deception for Stealth in populated areas' },
-                    { name: 'Scholar', proficiency: 'Science', ability: 'Preserve Knowledge: Advantage on Persuasion with scholars' },
-                    { name: 'Teacher', proficiency: 'Insight', ability: 'Patient Approach: 1/mission use Wis save instead of another' },
-                    { name: 'Sentry', proficiency: 'Perception', ability: 'Long Night: Ignore first night without rest' },
-                    { name: 'Wright', proficiency: 'Engineering', ability: 'Measure Twice: Half prof bonus on non-proficient tools' },
-                    { name: 'Sleuth', proficiency: 'Investigation', ability: 'The Reveal: Advantage on Persuasion to accuse wrongdoing' },
-                    { name: 'Underworld', proficiency: 'Sleight of Hand', ability: 'Black Market: Advantage contacting underworld members' },
-                    { name: 'Student', proficiency: 'Perception', ability: 'Quick Study: 1/mission use Int save instead of another' }
-                ],
-                racial: {
-                    'Human': [
-                        { name: 'Tau\'ri Military', attribute: 'None', proficiency: { type: 'choice', options: ['Martial Arts', 'Longarms', 'Heavy Armor'] }, ability: 'Basic Training: Chosen proficiency from military service' }
-                    ],
-                    'Jaffa': [
-                        { name: 'Jaffa Renegade', attribute: 'Wisdom +1', ability: 'Rebel: Advantage on saves vs Goa\'uld and Jaffa' },
-                        { name: 'Student of Bra\'tac', attribute: 'Dexterity +1', ability: 'Ma\'tok Mastery: Ma\'tok gains finesse property' }
-                    ],
-                    'Aturen': [
-                        { name: 'Aturen Spiritualist', attribute: 'None', ability: 'Ritual of Life: DC 20 Culture check to resurrect' }
-                    ],
-                    'Tok\'ra': [
-                        { name: 'Tok\'ra Spy', attribute: 'Charisma +1', ability: 'Passing: Advantage on Deception as Human/Goa\'uld/Jaffa' }
-                    ],
-                    'Unas': [
-                        { name: 'Unas Alpha', attribute: 'Charisma +1', ability: 'Clan Leader: Other Unas gain advantage on saves/attacks' }
-                    ]
-                }
+            // Helper functions
+            const getProficiencyBonus = (level) => {
+                if (level <= 4) return 2;
+                if (level <= 8) return 3;
+                if (level <= 12) return 4;
+                if (level <= 16) return 5;
+                return 6;
             };
 
-            // Calculate ability modifier
             const getModifier = (score) => {
                 return Math.floor((score - 10) / 2);
             };
 
-            // Calculate bonuses for each ability score
+            const getProficiencyDescription = (proficiencies) => {
+                const descriptions = [];
+                
+                if (proficiencies?.skills) {
+                    if (proficiencies.skills.type === 'choice') {
+                        descriptions.push(`Choose ${proficiencies.skills.count} skill${proficiencies.skills.count > 1 ? 's' : ''}`);
+                    } else if (proficiencies.skills.type === 'mixed') {
+                        const fixedSkills = proficiencies.skills.fixed.join(', ');
+                        descriptions.push(`${fixedSkills} (fixed)`);
+                        if (proficiencies.skills.additionalChoice) {
+                            descriptions.push(`Choose ${proficiencies.skills.additionalChoice.count} additional skill${proficiencies.skills.additionalChoice.count > 1 ? 's' : ''}`);
+                        }
+                    }
+                }
+                
+                if (proficiencies?.weapons) {
+                    if (proficiencies.weapons.type === 'choice') {
+                        descriptions.push(`Choose ${proficiencies.weapons.count} weapon proficiency`);
+                    } else if (proficiencies.weapons.type === 'fixed') {
+                        descriptions.push(`${proficiencies.weapons.list.join(', ')} (fixed)`);
+                    }
+                }
+                
+                if (proficiencies?.armor) {
+                    if (proficiencies.armor.type === 'fixed') {
+                        descriptions.push(`${proficiencies.armor.list.join(', ')} (fixed)`);
+                    }
+                }
+                
+                return descriptions;
+            };
+
             const getAbilityBonuses = (ability) => {
                 let racialBonus = 0;
                 let originBonus = 0;
                 let asiBonus = 0;
-
+                
                 // Racial bonus
                 const raceData = races[character.race]?.subraces[character.subrace];
                 if (raceData && raceData.abilityIncrease) {
@@ -589,7 +778,7 @@
                         racialBonus = raceData.abilityIncrease[ability];
                     }
                 }
-
+                
                 // Origin bonuses
                 character.origins.forEach(originName => {
                     const biomeOrigin = origins.biome.find(o => o.name === originName);
@@ -609,7 +798,7 @@
                         }
                     }
                 });
-
+                
                 // Ability Score Improvements at level 4
                 if (character.level >= 4 && character.abilityScoreImprovements) {
                     Object.values(character.abilityScoreImprovements).forEach(improvement => {
@@ -620,23 +809,21 @@
                         }
                     });
                 }
-
+                
                 return { racialBonus, originBonus, asiBonus };
             };
 
-            // Get final ability scores with racial modifiers
             const getFinalAbilityScores = () => {
                 const finalScores = { ...character.abilityScores };
-
+                
                 Object.keys(finalScores).forEach(ability => {
                     const { racialBonus, originBonus, asiBonus } = getAbilityBonuses(ability);
                     finalScores[ability] += racialBonus + originBonus + asiBonus;
                 });
-
+                
                 return finalScores;
             };
 
-            // Calculate HP with breakdown
             const getHPBreakdown = () => {
                 const breakdown = {
                     classBase: 0,
@@ -646,28 +833,28 @@
                     militaryBonus: 0,
                     total: 0
                 };
-
+                
                 if (!character.race || !character.subrace || !character.class) return breakdown;
-
+                
                 const raceData = races[character.race]?.subraces[character.subrace];
                 const classData = classes[character.class];
                 const finalScores = getFinalAbilityScores();
                 const conMod = getModifier(finalScores.constitution);
-
+                
                 breakdown.classBase = classData.hitDie;
                 breakdown.conModifier = conMod;
                 breakdown.raceBonus = raceData.hitPoints;
-
+                
                 // Check for Military origin bonus
                 if (character.origins.includes('Military')) {
                     breakdown.militaryBonus = character.level;
                 }
-
+                
                 // Calculate level bonus
                 if (character.level > 1) {
                     breakdown.levelBonus = (character.level - 1) * (classData.hpPerLevel + conMod);
                 }
-
+                
                 breakdown.total = Math.max(1, 
                     breakdown.classBase + 
                     breakdown.conModifier + 
@@ -675,60 +862,58 @@
                     breakdown.levelBonus +
                     breakdown.militaryBonus
                 );
-
+                
                 return breakdown;
             };
 
-            // Calculate determination with breakdown
             const getDeterminationBreakdown = () => {
                 const breakdown = {
                     base: Math.floor((character.level + 4) / 5) * 2,
                     classBonus: 0,
                     total: 0
                 };
-
+                
                 if (character.class) {
                     breakdown.classBonus = classes[character.class].determinationBonus;
                 }
-
+                
                 breakdown.total = breakdown.base + breakdown.classBonus;
                 return breakdown;
             };
 
-            // Calculate AC with breakdown
             const getACBreakdown = () => {
                 const finalScores = getFinalAbilityScores();
                 const dexMod = getModifier(finalScores.dexterity);
-
+                
                 const breakdown = {
                     base: 10,
                     dexModifier: dexMod,
                     armorBonus: 0,
                     total: 10 + dexMod
                 };
-
+                
                 return breakdown;
             };
 
-            // Calculate Initiative with breakdown
             const getInitiativeBreakdown = () => {
                 const finalScores = getFinalAbilityScores();
                 const dexMod = getModifier(finalScores.dexterity);
                 const wisMod = getModifier(finalScores.wisdom);
-
+                
+                let total = Math.max(dexMod, wisMod);
+                
                 return {
                     dexModifier: dexMod,
                     wisModifier: wisMod,
-                    total: Math.max(dexMod, wisMod)
+                    total: total
                 };
             };
 
-            // Calculate Moxie with breakdown
             const getMoxieBreakdown = () => {
                 const finalScores = getFinalAbilityScores();
                 const intMod = getModifier(finalScores.intelligence);
                 const chaMod = getModifier(finalScores.charisma);
-
+                
                 return {
                     intModifier: intMod,
                     chaModifier: chaMod,
@@ -736,59 +921,138 @@
                 };
             };
 
-            // Get required number of feats based on class and level
             const getRequiredFeatCount = () => {
                 if (!character.class) return 0;
                 const classData = classes[character.class];
                 if (!classData.featChoices) return 0;
-
+                
                 let totalFeats = 0;
                 Object.entries(classData.featChoices).forEach(([level, choice]) => {
                     if (parseInt(level) <= character.level) {
                         totalFeats += choice.count;
                     }
                 });
-
+                
                 return totalFeats;
             };
 
-            // Get available feat type for the class
             const getClassFeatType = () => {
                 if (!character.class) return null;
                 const classData = classes[character.class];
                 if (!classData.featChoices) return null;
-
-                // Get the feat type from the first feat choice
-                const firstChoice = Object.values(classData.featChoices)[0];
-                return firstChoice ? firstChoice.type : null;
+                
+                // Get the feat types required for current level
+                const featTypes = [];
+                Object.entries(classData.featChoices).forEach(([level, choice]) => {
+                    if (parseInt(level) <= character.level) {
+                        featTypes.push(choice.type);
+                    }
+                });
+                
+                return featTypes;
             };
 
-            // Update derived stats
-            useEffect(() => {
-                const hpBreakdown = getHPBreakdown();
-                const finalScores = getFinalAbilityScores();
-                const dexMod = getModifier(finalScores.dexterity);
-                const wisMod = getModifier(finalScores.wisdom);
-                const intMod = getModifier(finalScores.intelligence);
-                const chaMod = getModifier(finalScores.charisma);
-
-                // Check for speed modifications
-                let speed = 6;
-                if (character.origins.includes('Grasslands')) {
-                    speed = 7; // +1m from Natural Sprinter
+            const getClassFeats = () => {
+                const featTypes = getClassFeatType();
+                if (!featTypes || featTypes.length === 0) return [];
+                
+                // Special handling for Scout's field hack feats
+                if (character.class === 'Scout') {
+                    return fieldHackFeats;
                 }
+                
+                // For other classes, get the appropriate feat list
+                const uniqueTypes = [...new Set(featTypes)];
+                if (uniqueTypes.length === 1) {
+                    return classFeatsByType[uniqueTypes[0]] || [];
+                }
+                
+                return [];
+            };
 
-                setCharacter(prev => ({
-                    ...prev,
-                    hp: hpBreakdown.total,
-                    maxHp: hpBreakdown.total,
-                    initiative: Math.max(dexMod, wisMod),
-                    moxie: Math.max(intMod, chaMod),
-                    armorClass: 10 + dexMod,
-                    speed: speed,
-                    determinationPoints: getDeterminationBreakdown().total
-                }));
-            }, [character.race, character.subrace, character.class, character.level, character.abilityScores, character.abilityChoice, character.origins, character.abilityScoreImprovements]);
+            const getClassAbilities = () => {
+                if (!character.class) return [];
+                
+                const classData = classes[character.class];
+                if (!classData.abilities) return [];
+                
+                const abilities = [];
+                
+                Object.entries(classData.abilities).forEach(([level, levelAbilities]) => {
+                    const levelNum = parseInt(level);
+                    if (levelNum <= character.level) {
+                        // Filter out ability score improvements and feat choices
+                        const filteredAbilities = levelAbilities.filter(ability => {
+                            return !ability.includes('Ability Score Improvement') && 
+                                   !ability.includes('Choose') && 
+                                   !ability.includes('feat');
+                        });
+                        
+                        if (filteredAbilities.length > 0) {
+                            abilities.push({
+                                level: levelNum,
+                                abilities: filteredAbilities
+                            });
+                        }
+                    }
+                });
+                
+                return abilities;
+            };
+
+            const needsAbilityChoice = () => {
+                const raceData = races[character.race]?.subraces[character.subrace];
+                return raceData?.abilityIncrease?.type === 'choice' && !character.abilityChoice;
+            };
+
+            const allChoicesMade = () => {
+                // Check race proficiency choices
+                const raceData = races[character.race]?.subraces[character.subrace];
+                if (raceData?.proficiencies) {
+                    if (raceData.proficiencies.skills?.type === 'choice') {
+                        const required = raceData.proficiencies.skills.count;
+                        const chosen = character.raceChoices.skills?.length || 0;
+                        if (chosen < required) return false;
+                    }
+                    
+                    if (raceData.proficiencies.skills?.type === 'mixed' && raceData.proficiencies.skills.additionalChoice) {
+                        const required = raceData.proficiencies.skills.additionalChoice.count;
+                        const chosen = character.raceChoices.additionalSkills?.length || 0;
+                        if (chosen < required) return false;
+                    }
+                    
+                    if (raceData.proficiencies.weapons?.type === 'choice') {
+                        const required = raceData.proficiencies.weapons.count;
+                        const chosen = character.raceChoices.weapons?.length || 0;
+                        if (chosen < required) return false;
+                    }
+                }
+                
+                // Check origin choices
+                for (const originName of character.origins) {
+                    const backgroundOrigin = origins.background.find(o => o.name === originName);
+                    if (backgroundOrigin?.proficiency?.type === 'choice' && !character.originChoices[originName]) {
+                        return false;
+                    }
+                    
+                    const racialOrigin = origins.racial[character.race]?.find(o => o.name === originName);
+                    if (racialOrigin?.proficiency?.type === 'choice' && !character.originChoices[originName]) {
+                        return false;
+                    }
+                }
+                
+                // Check class feat choices
+                const requiredFeats = getRequiredFeatCount();
+                const selectedFeats = character.classFeats.length;
+                if (selectedFeats < requiredFeats) return false;
+                
+                // Check ASI choices at level 4
+                if (character.level >= 4 && (!character.abilityScoreImprovements || Object.keys(character.abilityScoreImprovements).length === 0)) {
+                    return false;
+                }
+                
+                return true;
+            };
 
             // Point buy system
             const pointBuyCost = {
@@ -812,21 +1076,51 @@
                 }));
             };
 
+            // Update derived stats
+            useEffect(() => {
+                const hpBreakdown = getHPBreakdown();
+                const finalScores = getFinalAbilityScores();
+                const dexMod = getModifier(finalScores.dexterity);
+                const intMod = getModifier(finalScores.intelligence);
+                const chaMod = getModifier(finalScores.charisma);
+                
+                let speed = 6;
+                if (character.origins.includes('Grasslands')) {
+                    speed = 7;
+                }
+                
+                setCharacter(prev => ({
+                    ...prev,
+                    hp: hpBreakdown.total,
+                    maxHp: hpBreakdown.total,
+                    initiative: getInitiativeBreakdown().total,
+                    moxie: Math.max(intMod, chaMod),
+                    armorClass: 10 + dexMod,
+                    speed: speed,
+                    determinationPoints: getDeterminationBreakdown().total
+                }));
+            }, [character.race, character.subrace, character.class, character.level, character.abilityScores, character.abilityChoice, character.origins, character.abilityScoreImprovements]);
+
             // Export character sheet
             const exportCharacterSheet = () => {
                 const raceData = races[character.race]?.subraces[character.subrace];
                 const classData = classes[character.class];
                 const finalScores = getFinalAbilityScores();
-
-                // Build feat list
+                
                 let featList = '';
                 if (character.classFeats) {
                     character.classFeats.forEach((featName, idx) => {
-                        featList += `Feat ${idx + 1}: ${featName}\n`;
+                        featList += `Class Feat ${idx + 1}: ${featName}\n`;
                     });
                 }
-
-                // Build ASI list
+                
+                let bonusFeatList = '';
+                if (character.bonusFeats) {
+                    character.bonusFeats.forEach((feat) => {
+                        bonusFeatList += `${feat}\n`;
+                    });
+                }
+                
                 let asiList = '';
                 if (character.abilityScoreImprovements) {
                     Object.entries(character.abilityScoreImprovements).forEach(([key, value]) => {
@@ -835,7 +1129,7 @@
                         }
                     });
                 }
-
+                
                 const sheet = `STARGATE RPG CHARACTER SHEET
 =============================
 Name: ${character.name || 'Unnamed Character'}
@@ -843,8 +1137,9 @@ Race: ${character.race} (${character.subrace})
 Origins: ${character.origins.join(', ')}
 Class: ${character.class}
 Level: ${character.level}
+Proficiency Bonus: +${getProficiencyBonus(character.level)}
 
-ABILITY SCORES (with racial modifiers)
+ABILITY SCORES (with all modifiers)
 Strength:     ${finalScores.strength} (${getModifier(finalScores.strength) >= 0 ? '+' : ''}${getModifier(finalScores.strength)})
 Dexterity:    ${finalScores.dexterity} (${getModifier(finalScores.dexterity) >= 0 ? '+' : ''}${getModifier(finalScores.dexterity)})
 Constitution: ${finalScores.constitution} (${getModifier(finalScores.constitution) >= 0 ? '+' : ''}${getModifier(finalScores.constitution)})
@@ -861,8 +1156,8 @@ Determination Points: ${character.determinationPoints}
 Moxie: ${character.moxie >= 0 ? '+' : ''}${character.moxie}
 
 PROFICIENCIES
-${classData ?
-`Armor: ${classData.proficiencies.armor.join(', ')}
+${classData ? 
+  `Armor: ${classData.proficiencies.armor.join(', ')}
 Weapons: ${classData.proficiencies.weapons.join(', ')}
 Tools: ${classData.proficiencies.tools.join(', ')}
 Saves: ${classData.proficiencies.saves.join(', ')}
@@ -876,20 +1171,22 @@ RACIAL ABILITIES
 ${raceData ? raceData.abilities.join('\n') : 'None'}
 
 CLASS ABILITIES
-${classData ?
-Object.entries(classData.abilities)
-.filter(([lvl, _]) => parseInt(lvl) <= character.level)
-.map(([lvl, abilities]) => `Level ${lvl}: ${abilities.join(', ')}`)
-.join('\n') : ''}
+${classData ? 
+  Object.entries(classData.abilities)
+    .filter(([lvl, _]) => parseInt(lvl) <= character.level)
+    .map(([lvl, abilities]) => `Level ${lvl}: ${abilities.join(', ')}`)
+    .join('\n') : ''}
 
 CLASS FEATS SELECTED
 ${featList || 'None selected'}
 
+BONUS FEATS
+${bonusFeatList || 'None'}
+
 ABILITY SCORE IMPROVEMENTS
 ${asiList || 'None selected'}
 `;
-
-                // Create and trigger download
+                
                 const element = document.createElement('a');
                 const file = new Blob([sheet], { type: 'text/plain' });
                 element.href = URL.createObjectURL(file);
@@ -899,78 +1196,24 @@ ${asiList || 'None selected'}
                 document.body.removeChild(element);
             };
 
-            // Check if we need ability choice
-            const needsAbilityChoice = () => {
-                const raceData = races[character.race]?.subraces[character.subrace];
-                return raceData?.abilityIncrease?.type === 'choice' && !character.abilityChoice;
-            };
-
-            // Check if all required choices are made
-            const allChoicesMade = () => {
-                // Check race proficiency choices
-                const raceData = races[character.race]?.subraces[character.subrace];
-                if (raceData?.proficiencies) {
-                    // Standard skill choices
-                    if (raceData.proficiencies.skills?.type === 'choice') {
-                        const required = raceData.proficiencies.skills.count;
-                        const chosen = character.raceChoices.skills?.length || 0;
-                        if (chosen < required) return false;
-                    }
-
-                    // Mixed type (Tollan) - fixed skills plus additional choices
-                    if (raceData.proficiencies.skills?.type === 'mixed' && raceData.proficiencies.skills.additionalChoice) {
-                        const required = raceData.proficiencies.skills.additionalChoice.count;
-                        const chosen = character.raceChoices.additionalSkills?.length || 0;
-                        if (chosen < required) return false;
-                    }
-                    
-                    // Weapon choices
-                    if (raceData.proficiencies.weapons?.type === 'choice') {
-                        const required = raceData.proficiencies.weapons.count;
-                        const chosen = character.raceChoices.weapons?.length || 0;
-                        if (chosen < required) return false;
-                    }
-                }
-
-                // Check origin choices
-                for (const originName of character.origins) {
-                    const backgroundOrigin = origins.background.find(o => o.name === originName);
-                    if (backgroundOrigin?.proficiency?.type === 'choice' && !character.originChoices[originName]) {
-                        return false;
-                    }
-                    
-                    const racialOrigin = origins.racial[character.race]?.find(o => o.name === originName);
-                    if (racialOrigin?.proficiency?.type === 'choice' && !character.originChoices[originName]) {
-                        return false;
-                    }
-                }
-
-                // Check class feat choices
-                const requiredFeats = getRequiredFeatCount();
-                const selectedFeats = character.classFeats.length;
-                if (selectedFeats < requiredFeats) return false;
-
-                // Check ASI choices at level 4
-                if (character.level >= 4 && (!character.abilityScoreImprovements || Object.keys(character.abilityScoreImprovements).length === 0)) {
-                    return false;
-                }
-
-                return true;
+            // Create icon component wrappers for lucide icons
+            const IconWrapper = ({ icon: Icon, className }) => {
+                return React.createElement(Icon, { className });
             };
 
             return (
                 <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-4">
-                    <div className="max-w-6xl mx-auto">
+                    <div className="max-w-7xl mx-auto">
                         <div className="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-2xl border border-blue-500/30">
                             {/* Header */}
                             <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-t-lg">
                                 <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                                     <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                                        <span className="icon-target"></span>
+                                        <IconWrapper icon={Target} className="w-6 h-6" />
                                     </div>
-                                    Stargate RPG Character Editor
+                                    Stargate RPG Character Builder
                                 </h1>
-                                <p className="text-blue-100 mt-2">Create your Phoenix Site operative</p>
+                                <p className="text-blue-100 mt-2">Create your Phoenix Site operative (Levels 1-5)</p>
                             </div>
 
                             <div className="p-6 space-y-6">
@@ -1051,10 +1294,10 @@ ${asiList || 'None selected'}
                                                                 <span>Ability Increase:</span>
                                                                 <span className={subraceData.abilityIncrease.type === 'choice' ? 'text-yellow-300' : 'text-gray-400'}>
                                                                     {subraceData.abilityIncrease.type === 'choice' ? (
-                                                                        <span>
-                                                                            <span className="icon-alert"></span>
+                                                                        <>
+                                                                            <IconWrapper icon={AlertCircle} className="inline w-3 h-3 mr-1" />
                                                                             Choose ONE: +{subraceData.abilityIncrease.value} to {subraceData.abilityIncrease.options.join(' OR ')}
-                                                                        </span>
+                                                                        </>
                                                                     ) : (
                                                                         Object.entries(subraceData.abilityIncrease)
                                                                             .filter(([key]) => key !== 'type')
@@ -1064,7 +1307,6 @@ ${asiList || 'None selected'}
                                                                 </span>
                                                             </div>
                                                             
-                                                            {/* Display proficiencies */}
                                                             {proficiencyDesc.length > 0 && (
                                                                 <div className="mt-2">
                                                                     <span className="font-semibold text-gray-300">Proficiencies:</span>
@@ -1097,7 +1339,7 @@ ${asiList || 'None selected'}
                                  races[character.race]?.subraces[character.subrace]?.abilityIncrease?.type === 'choice' && (
                                     <div className={`rounded-lg p-4 ${!character.abilityChoice ? 'bg-yellow-500/20 border-2 border-yellow-500' : 'bg-gray-700/50'}`}>
                                         <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                                            {!character.abilityChoice && <span className="icon-alert"></span>}
+                                            {!character.abilityChoice && <IconWrapper icon={AlertCircle} className="w-5 h-5 text-yellow-400" />}
                                             <span className={!character.abilityChoice ? 'text-yellow-300' : 'text-gray-300'}>
                                                 Choose ONE Ability Score Increase (+{races[character.race].subraces[character.subrace].abilityIncrease.value})
                                             </span>
@@ -1284,7 +1526,7 @@ ${asiList || 'None selected'}
                                     </>
                                 )}
 
-                                {/* Origins Selection with Full Benefits */}
+                                {/* Origins Selection */}
                                 <div className="bg-gray-700/50 rounded-lg p-4">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                         Select Origins (Choose 2 from different categories)
@@ -1329,7 +1571,6 @@ ${asiList || 'None selected'}
                                                     <button
                                                         key={origin.name}
                                                         onClick={() => {
-                                                            // Prevent Jaffa from selecting Former Host
                                                             if (origin.name === 'Former Host' && character.race === 'Jaffa') {
                                                                 return;
                                                             }
@@ -1494,7 +1735,7 @@ ${asiList || 'None selected'}
                                                     ...prev, 
                                                     class: className, 
                                                     classFeats: [], 
-                                                    abilityScoreImprovements: {} 
+                                                    abilityScoreImprovements: {}
                                                 }))}
                                                 className={`p-3 rounded-lg border-2 transition-all ${
                                                     character.class === className
@@ -1511,93 +1752,251 @@ ${asiList || 'None selected'}
                                     </div>
                                 </div>
 
-                                {/* Level Selection */}
+                                {/* Class Proficiencies and Bonuses Display */}
+                                {character.class && (
+                                    <div className="bg-gray-700/50 rounded-lg p-4">
+                                        <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                                            <IconWrapper icon={BookOpen} className="w-4 h-4 text-purple-400" />
+                                            {character.class} Class Proficiencies & Bonuses
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                            <div className="bg-gray-800 rounded p-3">
+                                                <div className="text-xs font-semibold text-purple-400 mb-2">Combat</div>
+                                                <div className="space-y-1 text-xs text-gray-300">
+                                                    <div>Hit Die: d{classes[character.class].hitDie}</div>
+                                                    <div>HP/Level: {classes[character.class].hpPerLevel} + Con mod</div>
+                                                    <div>Determination: +{classes[character.class].determinationBonus}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-gray-800 rounded p-3">
+                                                <div className="text-xs font-semibold text-blue-400 mb-2">Saving Throws</div>
+                                                <div className="text-xs text-gray-300">
+                                                    {classes[character.class].proficiencies.saves.join(', ')}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-gray-800 rounded p-3">
+                                                <div className="text-xs font-semibold text-green-400 mb-2">Armor & Weapons</div>
+                                                <div className="space-y-1 text-xs text-gray-300">
+                                                    <div><span className="text-gray-500">Armor:</span> {classes[character.class].proficiencies.armor.join(', ')}</div>
+                                                    <div><span className="text-gray-500">Weapons:</span> {classes[character.class].proficiencies.weapons.join(', ')}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-gray-800 rounded p-3">
+                                                <div className="text-xs font-semibold text-yellow-400 mb-2">Tools</div>
+                                                <div className="text-xs text-gray-300">
+                                                    {classes[character.class].proficiencies.tools.join(', ') || 'None'}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-gray-800 rounded p-3 md:col-span-2">
+                                                <div className="text-xs font-semibold text-cyan-400 mb-2">Skills</div>
+                                                <div className="text-xs text-gray-300">
+                                                    {Array.isArray(classes[character.class].proficiencies.skills) ? 
+                                                        classes[character.class].proficiencies.skills.join(', ') :
+                                                        `Choose ${classes[character.class].proficiencies.skills.choose} from: ${classes[character.class].proficiencies.skills.from.join(', ')}`
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Level Selection (Limited to 1-5) */}
                                 <div className="bg-gray-700/50 rounded-lg p-4">
                                     <label className="block text-sm font-medium text-gray-300 mb-2">
                                         Character Level
                                     </label>
-                                    <div className="flex gap-2">
-                                        {[1, 2, 3, 4, 5].map(level => (
+                                    <div className="grid grid-cols-5 gap-2">
+                                        {Array.from({ length: 5 }, (_, i) => i + 1).map(level => (
                                             <button
                                                 key={level}
-                                                onClick={() => setCharacter(prev => ({ ...prev, level }))}
-                                                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                                                onClick={() => {
+                                                    setCharacter(prev => ({ 
+                                                        ...prev, 
+                                                        level,
+                                                        bonusFeats: level === 5 ? ['Attack Specialist'] : []
+                                                    }));
+                                                }}
+                                                className={`px-3 py-2 rounded-lg border-2 transition-all text-sm ${
                                                     character.level === level
                                                         ? 'border-green-500 bg-green-500/20 text-white'
                                                         : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
                                                 }`}
                                             >
-                                                Level {level}
+                                                {level}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* Class Feat Selection */}
+                                {/* Class Abilities Display */}
+                                {character.class && character.level > 0 && (
+                                    <div className="bg-gray-700/50 rounded-lg p-4">
+                                        <div 
+                                            className="flex items-center justify-between cursor-pointer"
+                                            onClick={() => setShowClassAbilities(!showClassAbilities)}
+                                        >
+                                            <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2">
+                                                <IconWrapper icon={BookOpen} className="w-5 h-5 text-purple-400" />
+                                                {character.class} Class Abilities (Levels 1-{character.level})
+                                            </h3>
+                                            <IconWrapper icon={ChevronDown} className={`w-5 h-5 text-gray-400 transition-transform ${showClassAbilities ? 'rotate-180' : ''}`} />
+                                        </div>
+                                        
+                                        {showClassAbilities && (
+                                            <div className="mt-4 space-y-3">
+                                                {(() => {
+                                                    const classAbilities = getClassAbilities();
+                                                    return classAbilities.length > 0 ? (
+                                                        classAbilities.map(({ level, abilities }) => (
+                                                            <div key={level} className="bg-gray-800 rounded-lg p-3">
+                                                                <div className="text-sm font-semibold text-purple-400 mb-2">
+                                                                    Level {level}
+                                                                </div>
+                                                                <div className="space-y-2">
+                                                                    {abilities.map((ability, idx) => {
+                                                                        // Parse ability name and description
+                                                                        const colonIndex = ability.indexOf('(');
+                                                                        const hasDescription = colonIndex !== -1;
+                                                                        const abilityName = hasDescription ? ability.substring(0, colonIndex).trim() : ability;
+                                                                        const abilityDesc = hasDescription ? ability.substring(colonIndex).trim() : '';
+                                                                        
+                                                                        return (
+                                                                            <div key={idx} className="pl-2 border-l-2 border-gray-700">
+                                                                                <div className="text-sm font-medium text-white">
+                                                                                    {abilityName}
+                                                                                </div>
+                                                                                {abilityDesc && (
+                                                                                    <div className="text-xs text-gray-400 mt-1">
+                                                                                        {abilityDesc}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="text-sm text-gray-400">
+                                                            No class abilities available at current level
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Class Feats */}
                                 {character.class && getRequiredFeatCount() > 0 && (
                                     <div className="bg-gray-700/50 rounded-lg p-4">
-                                        <h3 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                                            <span className="icon-sparkles"></span>
-                                            Class Feat Selection
-                                        </h3>
-                                        <p className="text-sm text-gray-400 mb-4">
-                                            Select {getRequiredFeatCount()} {getClassFeatType()} feat{getRequiredFeatCount() > 1 ? 's' : ''} for your {character.class} (Level {character.level})
-                                        </p>
+                                        <div 
+                                            className="flex items-center justify-between cursor-pointer"
+                                            onClick={() => setShowClassFeats(!showClassFeats)}
+                                        >
+                                            <h3 className="text-lg font-semibold text-gray-300 flex items-center gap-2">
+                                                <IconWrapper icon={Sparkles} className="w-5 h-5 text-yellow-400" />
+                                                Class Feat Selection
+                                            </h3>
+                                            <IconWrapper icon={ChevronDown} className={`w-5 h-5 text-gray-400 transition-transform ${showClassFeats ? 'rotate-180' : ''}`} />
+                                        </div>
                                         
-                                        <div className="space-y-2">
-                                            {feats[getClassFeatType()]?.map(feat => {
-                                                const isSelected = character.classFeats.includes(feat.name);
-                                                const canSelect = character.classFeats.length < getRequiredFeatCount() && !isSelected;
+                                        {showClassFeats && (
+                                            <>
+                                                <p className="text-sm text-gray-400 mb-4 mt-3">
+                                                    Select {getRequiredFeatCount()} {character.class === 'Scout' ? 'Field Hack' : getClassFeatType()[0]} feat{getRequiredFeatCount() > 1 ? 's' : ''} for your {character.class}
+                                                </p>
                                                 
-                                                return (
-                                                    <button
-                                                        key={feat.name}
-                                                        onClick={() => {
-                                                            setCharacter(prev => {
-                                                                if (isSelected) {
-                                                                    // Remove the feat
-                                                                    return {
-                                                                        ...prev,
-                                                                        classFeats: prev.classFeats.filter(f => f !== feat.name)
-                                                                    };
-                                                                } else if (canSelect) {
-                                                                    // Add the feat
-                                                                    return {
-                                                                        ...prev,
-                                                                        classFeats: [...prev.classFeats, feat.name]
-                                                                    };
-                                                                }
-                                                                return prev;
-                                                            });
-                                                        }}
-                                                        disabled={!isSelected && !canSelect}
-                                                        className={`w-full text-left p-3 rounded border transition-all ${
-                                                            isSelected
-                                                                ? 'border-purple-500 bg-purple-500/20'
-                                                                : canSelect
-                                                                ? 'border-gray-600 bg-gray-800 hover:border-gray-500'
-                                                                : 'border-gray-700 bg-gray-900/50 opacity-50 cursor-not-allowed'
-                                                        }`}
-                                                    >
-                                                        <div className="flex justify-between items-start">
-                                                            <div className="flex-1">
-                                                                <div className="font-semibold text-sm text-white">{feat.name}</div>
-                                                                <div className="text-xs text-gray-400 mt-1">{feat.description}</div>
-                                                            </div>
-                                                            {isSelected && (
-                                                                <div className="ml-2 text-purple-400">
-                                                                    ✓
+                                                <div className="space-y-2">
+                                                    {getClassFeats().map(feat => {
+                                                        const isSelected = character.classFeats.includes(feat.name);
+                                                        const canSelect = character.classFeats.length < getRequiredFeatCount() && !isSelected;
+                                                        
+                                                        return (
+                                                            <button
+                                                                key={feat.name}
+                                                                onClick={() => {
+                                                                    setCharacter(prev => {
+                                                                        if (isSelected) {
+                                                                            return {
+                                                                                ...prev,
+                                                                                classFeats: prev.classFeats.filter(f => f !== feat.name)
+                                                                            };
+                                                                        } else if (canSelect) {
+                                                                            return {
+                                                                                ...prev,
+                                                                                classFeats: [...prev.classFeats, feat.name]
+                                                                            };
+                                                                        }
+                                                                        return prev;
+                                                                    });
+                                                                }}
+                                                                disabled={!isSelected && !canSelect}
+                                                                className={`w-full text-left p-3 rounded border transition-all ${
+                                                                    isSelected
+                                                                        ? 'border-purple-500 bg-purple-500/20'
+                                                                        : canSelect
+                                                                        ? 'border-gray-600 bg-gray-800 hover:border-gray-500'
+                                                                        : 'border-gray-700 bg-gray-900/50 opacity-50 cursor-not-allowed'
+                                                                }`}
+                                                            >
+                                                                <div className="flex justify-between items-start">
+                                                                    <div className="flex-1">
+                                                                        <div className="font-semibold text-sm text-white">{feat.name}</div>
+                                                                        <div className="text-xs text-gray-400 mt-1">{feat.description}</div>
+                                                                        {feat.requirements && feat.requirements !== 'None' && (
+                                                                            <div className="text-xs text-yellow-400 mt-1">Requirements: {feat.requirements}</div>
+                                                                        )}
+                                                                    </div>
+                                                                    {isSelected && (
+                                                                        <div className="ml-2 text-purple-400">
+                                                                            ✓
+                                                                        </div>
+                                                                    )}
                                                                 </div>
-                                                            )}
-                                                        </div>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                        
-                                        <div className="mt-4 text-sm text-gray-400">
-                                            Selected: {character.classFeats.length}/{getRequiredFeatCount()}
-                                        </div>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                                
+                                                <div className="mt-4 text-sm text-gray-400">
+                                                    Selected: {character.classFeats.length}/{getRequiredFeatCount()}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Bonus Feat at Level 5 - Attack Specialist */}
+                                {character.level === 5 && (
+                                    <div className="bg-gray-700/50 rounded-lg p-4">
+                                        <h3 className="text-lg font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                                            <IconWrapper icon={Award} className="w-5 h-5 text-green-400" />
+                                            Bonus Feat - Attack Specialist (Level 5)
+                                        </h3>
+                                        <p className="text-sm text-gray-400 mb-3">
+                                            Choose a weapon type to gain +1 to attack and damage rolls
+                                        </p>
+                                        <select
+                                            value={attackSpecialistChoice}
+                                            onChange={(e) => {
+                                                setAttackSpecialistChoice(e.target.value);
+                                                setCharacter(prev => ({
+                                                    ...prev,
+                                                    bonusFeats: [`Attack Specialist (${e.target.value})`]
+                                                }));
+                                            }}
+                                            className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white"
+                                        >
+                                            <option value="">Select weapon type...</option>
+                                            {availableWeapons.map(weapon => (
+                                                <option key={weapon} value={weapon}>{weapon}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 )}
 
@@ -1742,118 +2141,15 @@ ${asiList || 'None selected'}
                                     </div>
                                 </div>
 
-                                {/* Final Ability Scores Visual Breakdown */}
-                                <div className="bg-gray-700/50 rounded-lg p-4">
-                                    <h3 className="text-lg font-semibold text-gray-300 mb-4">Final Ability Scores Breakdown</h3>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {Object.entries(character.abilityScores).map(([ability, baseScore]) => {
-                                            const { racialBonus, originBonus, asiBonus } = getAbilityBonuses(ability);
-                                            const totalBonus = racialBonus + originBonus + asiBonus;
-                                            const finalScore = baseScore + totalBonus;
-                                            const modifier = getModifier(finalScore);
-                                            
-                                            return (
-                                                <div key={ability} className="bg-gray-800 rounded-lg p-4">
-                                                    <div className="flex justify-between items-center mb-3">
-                                                        <span className="text-sm font-semibold text-white capitalize">{ability}</span>
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="text-2xl font-bold text-white">{finalScore}</span>
-                                                            <span className={`text-lg font-semibold px-2 py-1 rounded ${
-                                                                modifier >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                                                            }`}>
-                                                                {modifier >= 0 ? '+' : ''}{modifier}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="space-y-1 text-xs">
-                                                        <div className="flex justify-between items-center py-1 border-b border-gray-700">
-                                                            <span className="text-gray-400">Base (Point Buy)</span>
-                                                            <span className="text-gray-300 font-semibold">{baseScore}</span>
-                                                        </div>
-                                                        
-                                                        {racialBonus !== 0 && (
-                                                            <div className="flex justify-between items-center py-1 border-b border-gray-700">
-                                                                <span className="text-blue-400">Racial Bonus</span>
-                                                                <span className="text-blue-300 font-semibold">+{racialBonus}</span>
-                                                            </div>
-                                                        )}
-                                                        
-                                                        {originBonus !== 0 && (
-                                                            <div className="flex justify-between items-center py-1 border-b border-gray-700">
-                                                                <span className="text-purple-400">Origin Bonus</span>
-                                                                <span className="text-purple-300 font-semibold">+{originBonus}</span>
-                                                            </div>
-                                                        )}
-                                                        
-                                                        {asiBonus !== 0 && (
-                                                            <div className="flex justify-between items-center py-1 border-b border-gray-700">
-                                                                <span className="text-yellow-400">ASI Bonus</span>
-                                                                <span className="text-yellow-300 font-semibold">+{asiBonus}</span>
-                                                            </div>
-                                                        )}
-                                                        
-                                                        {totalBonus > 0 && (
-                                                            <div className="flex justify-between items-center pt-2 mt-1 border-t-2 border-gray-600">
-                                                                <span className="text-green-400 font-semibold">Total Bonus</span>
-                                                                <span className="text-green-300 font-bold">+{totalBonus}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    
-                                                    {/* Visual bar representation */}
-                                                    <div className="mt-3">
-                                                        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                                                            <div className="h-full flex">
-                                                                <div 
-                                                                    className="bg-gray-500"
-                                                                    style={{ width: `${(baseScore / 20) * 100}%` }}
-                                                                />
-                                                                {racialBonus > 0 && (
-                                                                    <div 
-                                                                        className="bg-blue-500"
-                                                                        style={{ width: `${(racialBonus / 20) * 100}%` }}
-                                                                    />
-                                                                )}
-                                                                {originBonus > 0 && (
-                                                                    <div 
-                                                                        className="bg-purple-500"
-                                                                        style={{ width: `${(originBonus / 20) * 100}%` }}
-                                                                    />
-                                                                )}
-                                                                {asiBonus > 0 && (
-                                                                    <div 
-                                                                        className="bg-yellow-500"
-                                                                        style={{ width: `${(asiBonus / 20) * 100}%` }}
-                                                                    />
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex justify-between mt-1">
-                                                            <span className="text-xs text-gray-500">0</span>
-                                                            <span className="text-xs text-gray-500">20</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                {/* Combat Statistics with Breakdowns */}
+                                {/* Combat Statistics */}
                                 <div className="bg-gray-700/50 rounded-lg p-4">
                                     <h3 className="text-lg font-semibold text-gray-300 mb-4">Combat Statistics</h3>
                                     
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                        {/* HP with breakdown */}
                                         <div className="bg-gray-800 rounded-lg p-3">
                                             <div className="flex items-center gap-2 text-red-400 mb-1">
-                                                <span className="icon-heart"></span>
+                                                <IconWrapper icon={Heart} className="w-4 h-4" />
                                                 <span className="text-xs">Hit Points</span>
-                                                <button className="ml-auto">
-                                                    <span className="icon-info"></span>
-                                                </button>
                                             </div>
                                             <div className="text-2xl font-bold text-white">{character.hp || 0}</div>
                                             <div className="text-xs text-gray-400 mt-1 space-y-0.5">
@@ -1872,10 +2168,9 @@ ${asiList || 'None selected'}
                                             </div>
                                         </div>
                                         
-                                        {/* AC with breakdown */}
                                         <div className="bg-gray-800 rounded-lg p-3">
                                             <div className="flex items-center gap-2 text-blue-400 mb-1">
-                                                <span className="icon-shield"></span>
+                                                <IconWrapper icon={Shield} className="w-4 h-4" />
                                                 <span className="text-xs">Armor Class</span>
                                             </div>
                                             <div className="text-2xl font-bold text-white">{character.armorClass}</div>
@@ -1893,10 +2188,9 @@ ${asiList || 'None selected'}
                                             </div>
                                         </div>
                                         
-                                        {/* Initiative with breakdown */}
                                         <div className="bg-gray-800 rounded-lg p-3">
                                             <div className="flex items-center gap-2 text-yellow-400 mb-1">
-                                                <span className="icon-zap"></span>
+                                                <IconWrapper icon={Activity} className="w-4 h-4" />
                                                 <span className="text-xs">Initiative</span>
                                             </div>
                                             <div className="text-2xl font-bold text-white">
@@ -1916,10 +2210,9 @@ ${asiList || 'None selected'}
                                             </div>
                                         </div>
                                         
-                                        {/* Determination with breakdown */}
                                         <div className="bg-gray-800 rounded-lg p-3">
                                             <div className="flex items-center gap-2 text-purple-400 mb-1">
-                                                <span className="icon-brain"></span>
+                                                <IconWrapper icon={Brain} className="w-4 h-4" />
                                                 <span className="text-xs">Determination</span>
                                             </div>
                                             <div className="text-2xl font-bold text-white">{character.determinationPoints}</div>
@@ -1936,22 +2229,21 @@ ${asiList || 'None selected'}
                                             </div>
                                         </div>
                                         
-                                        {/* Speed */}
                                         <div className="bg-gray-800 rounded-lg p-3">
                                             <div className="flex items-center gap-2 text-green-400 mb-1">
-                                                <span className="icon-activity"></span>
+                                                <IconWrapper icon={Footprints} className="w-4 h-4" />
                                                 <span className="text-xs">Speed</span>
                                             </div>
                                             <div className="text-2xl font-bold text-white">{character.speed}m</div>
                                             <div className="text-xs text-gray-400 mt-1">
-                                                {character.origins.includes('Grasslands') ? 'Base: 6m + 1m (Grasslands)' : 'Base: 6m'}
+                                                Base: 6m
+                                                {character.origins.includes('Grasslands') && ' +1m (Grasslands)'}
                                             </div>
                                         </div>
                                         
-                                        {/* Moxie with breakdown */}
                                         <div className="bg-gray-800 rounded-lg p-3">
                                             <div className="flex items-center gap-2 text-cyan-400 mb-1">
-                                                <span className="icon-user"></span>
+                                                <IconWrapper icon={User} className="w-4 h-4" />
                                                 <span className="text-xs">Moxie</span>
                                             </div>
                                             <div className="text-2xl font-bold text-white">
@@ -1971,44 +2263,15 @@ ${asiList || 'None selected'}
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    {/* Proficiency Bonus Display */}
+                                    <div className="mt-4 p-3 bg-gray-800 rounded-lg">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm text-gray-400">Proficiency Bonus</span>
+                                            <span className="text-lg font-bold text-white">+{getProficiencyBonus(character.level)}</span>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                {/* Class Abilities */}
-                                {character.class && (
-                                    <div className="bg-gray-700/50 rounded-lg p-4">
-                                        <h3 className="text-lg font-semibold text-gray-300 mb-4">Class Abilities</h3>
-                                        <div className="space-y-2">
-                                            {Object.entries(classes[character.class].abilities)
-                                                .filter(([lvl, _]) => parseInt(lvl) <= character.level)
-                                                .map(([lvl, abilities]) => (
-                                                    <div key={lvl} className="bg-gray-800 rounded-lg p-3">
-                                                        <span className="text-sm text-gray-400">Level {lvl}:</span>
-                                                        <div className="text-white mt-1">
-                                                            {abilities.join(', ')}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Warnings for incomplete choices */}
-                                {(needsAbilityChoice() || !allChoicesMade()) && (
-                                    <div className="bg-red-500/20 border-2 border-red-500 rounded-lg p-4">
-                                        <div className="flex items-center gap-2 text-red-300">
-                                            <span className="icon-alert"></span>
-                                            <span className="font-semibold">Action Required</span>
-                                        </div>
-                                        <ul className="text-red-200 text-sm mt-2 space-y-1">
-                                            {needsAbilityChoice() && (
-                                                <li>• Select an ability score bonus for your {character.subrace}</li>
-                                            )}
-                                            {!allChoicesMade() && (
-                                                <li>• Complete all proficiency and feat selections for your character</li>
-                                            )}
-                                        </ul>
-                                    </div>
-                                )}
 
                                 {/* Export Button */}
                                 <div className="flex justify-end">
@@ -2017,7 +2280,7 @@ ${asiList || 'None selected'}
                                         disabled={!character.race || !character.subrace || !character.class || character.origins.length < 2 || needsAbilityChoice() || !allChoicesMade()}
                                         className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                                     >
-                                        <span className="icon-download"></span>
+                                        <IconWrapper icon={Download} className="w-5 h-5" />
                                         Export Character Sheet
                                     </button>
                                 </div>
@@ -2028,6 +2291,7 @@ ${asiList || 'None selected'}
             );
         };
 
+        // Render the app
         ReactDOM.render(<StargateCharacterEditor />, document.getElementById('root'));
     </script>
 </body>
