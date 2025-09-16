@@ -65,7 +65,7 @@
             target: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
             activity: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
             download: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
-            alertCircle: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>',
+            alertCircle: '<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>',
             sparkles: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>',
             award: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
             bookOpen: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>'
@@ -604,6 +604,38 @@
             }, 0);
         }
 
+        function getProficiencyDescription(proficiencies) {
+            const descriptions = [];
+            
+            if (proficiencies?.skills) {
+                if (proficiencies.skills.type === 'choice') {
+                    descriptions.push(`Choose ${proficiencies.skills.count} skill${proficiencies.skills.count > 1 ? 's' : ''}`);
+                } else if (proficiencies.skills.type === 'mixed') {
+                    const fixedSkills = proficiencies.skills.fixed.join(', ');
+                    descriptions.push(`${fixedSkills} (fixed)`);
+                    if (proficiencies.skills.additionalChoice) {
+                        descriptions.push(`Choose ${proficiencies.skills.additionalChoice.count} additional skill${proficiencies.skills.additionalChoice.count > 1 ? 's' : ''}`);
+                    }
+                }
+            }
+            
+            if (proficiencies?.weapons) {
+                if (proficiencies.weapons.type === 'choice') {
+                    descriptions.push(`Choose ${proficiencies.weapons.count} weapon proficiency`);
+                } else if (proficiencies.weapons.type === 'fixed') {
+                    descriptions.push(`${proficiencies.weapons.list.join(', ')} (fixed)`);
+                }
+            }
+            
+            if (proficiencies?.armor) {
+                if (proficiencies.armor.type === 'fixed') {
+                    descriptions.push(`${proficiencies.armor.list.join(', ')} (fixed)`);
+                }
+            }
+            
+            return descriptions;
+        }
+
         function getAbilityBonuses(ability) {
             let racialBonus = 0;
             let originBonus = 0;
@@ -878,27 +910,58 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         Select ${state.character.race} Variant
                     </label>
                     <div class="space-y-3">
-                        ${Object.entries(gameData.races[state.character.race].subraces).map(([subraceName, subraceData]) => `
-                            <div
-                                data-subrace="${subraceName}"
-                                class="subrace-btn p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                                    state.character.subrace === subraceName
-                                        ? 'border-green-500 bg-green-500/20'
-                                        : 'border-gray-600 bg-gray-800 hover:border-gray-500'
-                                }"
-                            >
-                                <div class="font-semibold text-white mb-2">${subraceName}</div>
-                                <div class="text-xs text-gray-400 space-y-1">
-                                    <div>HP Bonus: +${subraceData.hitPoints}</div>
-                                    <div>Abilities:</div>
-                                    <ul class="ml-2 mt-1">
-                                        ${subraceData.abilities.map(ability => `
-                                            <li class="text-xs">• ${ability}</li>
-                                        `).join('')}
-                                    </ul>
+                        ${Object.entries(gameData.races[state.character.race].subraces).map(([subraceName, subraceData]) => {
+                            const proficiencyDesc = getProficiencyDescription(subraceData.proficiencies);
+                            
+                            return `
+                                <div
+                                    data-subrace="${subraceName}"
+                                    class="subrace-btn p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                        state.character.subrace === subraceName
+                                            ? 'border-green-500 bg-green-500/20'
+                                            : 'border-gray-600 bg-gray-800 hover:border-gray-500'
+                                    }"
+                                >
+                                    <div class="font-semibold text-white mb-2">${subraceName}</div>
+                                    <div class="text-xs text-gray-400 space-y-1">
+                                        <div>HP Bonus: +${subraceData.hitPoints}</div>
+                                        <div class="flex items-start gap-1">
+                                            <span>Ability Increase:</span>
+                                            <span class="${subraceData.abilityIncrease.type === 'choice' ? 'text-yellow-300' : 'text-gray-400'}">
+                                                ${subraceData.abilityIncrease.type === 'choice' ? 
+                                                    `${icons.alertCircle} Choose ONE: +${subraceData.abilityIncrease.value} to ${subraceData.abilityIncrease.options.join(' OR ')}`
+                                                    : 
+                                                    Object.entries(subraceData.abilityIncrease)
+                                                        .filter(([key]) => key !== 'type')
+                                                        .map(([key, val]) => `${key}: +${val}`)
+                                                        .join(', ')
+                                                }
+                                            </span>
+                                        </div>
+                                        
+                                        ${proficiencyDesc.length > 0 ? `
+                                            <div class="mt-2">
+                                                <span class="font-semibold text-gray-300">Proficiencies:</span>
+                                                <ul class="ml-2 mt-1">
+                                                    ${proficiencyDesc.map(desc => `
+                                                        <li class="text-xs text-blue-300">• ${desc}</li>
+                                                    `).join('')}
+                                                </ul>
+                                            </div>
+                                        ` : ''}
+                                        
+                                        <div class="mt-2">
+                                            <span class="font-semibold text-gray-300">Abilities:</span>
+                                            <ul class="ml-2 mt-1">
+                                                ${subraceData.abilities.map(ability => `
+                                                    <li class="text-xs">• ${ability}</li>
+                                                `).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 </div>
             `;
@@ -918,6 +981,11 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                             Choose ONE Ability Score Increase (+${raceData.abilityIncrease.value})
                         </span>
                     </label>
+                    ${!state.character.abilityChoice ? `
+                        <p class="text-xs text-yellow-200 mb-3">
+                            ⚠️ You must select which ability score receives the racial bonus. Only ONE ability can be chosen.
+                        </p>
+                    ` : ''}
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                         ${raceData.abilityIncrease.options.map(ability => `
                             <button
@@ -929,6 +997,9 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                                 }"
                             >
                                 ${ability}
+                                ${state.character.abilityChoice === ability ? `
+                                    <div class="text-xs mt-1 text-purple-300">✓ Selected</div>
+                                ` : ''}
                             </button>
                         `).join('')}
                     </div>
@@ -940,32 +1011,117 @@ ${state.character.classFeats.join('\n') || 'None selected'}
             if (!state.character.race || !state.character.subrace) return '';
             
             const raceData = gameData.races[state.character.race]?.subraces[state.character.subrace];
-            if (!raceData?.proficiencies?.skills?.type || raceData.proficiencies.skills.type !== 'choice') return '';
+            let html = '';
             
-            return `
-                <div class="bg-gray-700/50 rounded-lg p-4">
-                    <label class="block text-sm font-medium text-gray-300 mb-2">
-                        Choose ${raceData.proficiencies.skills.count} Skill Proficienc${raceData.proficiencies.skills.count > 1 ? 'ies' : 'y'}
-                    </label>
-                    <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
-                        ${gameData.availableSkills.map(skill => {
-                            const isSelected = state.character.raceChoices.skills?.includes(skill);
-                            return `
+            // Standard skills choice
+            if (raceData?.proficiencies?.skills?.type === 'choice') {
+                html += `
+                    <div class="bg-gray-700/50 rounded-lg p-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Choose ${raceData.proficiencies.skills.count} Skill Proficienc${raceData.proficiencies.skills.count > 1 ? 'ies' : 'y'}
+                        </label>
+                        <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
+                            ${gameData.availableSkills.map(skill => {
+                                const isSelected = state.character.raceChoices.skills?.includes(skill);
+                                const maxReached = (state.character.raceChoices.skills?.length || 0) >= raceData.proficiencies.skills.count;
+                                
+                                return `
+                                    <button
+                                        data-race-skill="${skill}"
+                                        class="race-skill-btn p-2 rounded text-xs transition-all ${
+                                            isSelected
+                                                ? 'bg-green-500/20 border border-green-500 text-white'
+                                                : maxReached
+                                                ? 'bg-gray-800 border border-gray-600 text-gray-300 opacity-50'
+                                                : 'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                        }"
+                                    >
+                                        ${skill}
+                                    </button>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Mixed type (Tollan)
+            if (raceData?.proficiencies?.skills?.type === 'mixed') {
+                html += `
+                    <div class="bg-gray-700/50 rounded-lg p-4">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">
+                                Fixed Skill Proficiencies
+                            </label>
+                            <div class="flex gap-2">
+                                ${raceData.proficiencies.skills.fixed.map(skill => `
+                                    <span class="px-3 py-1 bg-blue-500/20 border border-blue-500 text-blue-300 rounded text-sm">
+                                        ${skill} (Automatic)
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        ${raceData.proficiencies.skills.additionalChoice ? `
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    Choose ${raceData.proficiencies.skills.additionalChoice.count} Additional Skill Proficienc${raceData.proficiencies.skills.additionalChoice.count > 1 ? 'ies' : 'y'}
+                                </label>
+                                <div class="grid grid-cols-3 md:grid-cols-4 gap-2">
+                                    ${gameData.availableSkills
+                                        .filter(skill => !raceData.proficiencies.skills.fixed.includes(skill))
+                                        .map(skill => {
+                                            const isSelected = state.character.raceChoices.additionalSkills?.includes(skill);
+                                            const maxReached = (state.character.raceChoices.additionalSkills?.length || 0) >= raceData.proficiencies.skills.additionalChoice.count;
+                                            
+                                            return `
+                                                <button
+                                                    data-additional-skill="${skill}"
+                                                    class="additional-skill-btn p-2 rounded text-xs transition-all ${
+                                                        isSelected
+                                                            ? 'bg-green-500/20 border border-green-500 text-white'
+                                                            : maxReached
+                                                            ? 'bg-gray-800 border border-gray-600 text-gray-300 opacity-50'
+                                                            : 'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                                    }"
+                                                >
+                                                    ${skill}
+                                                </button>
+                                            `;
+                                        }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+            
+            // Weapon choice
+            if (raceData?.proficiencies?.weapons?.type === 'choice') {
+                html += `
+                    <div class="bg-gray-700/50 rounded-lg p-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">
+                            Choose ${raceData.proficiencies.weapons.count} Weapon Proficiency
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            ${gameData.availableWeapons.map(weapon => `
                                 <button
-                                    data-race-skill="${skill}"
-                                    class="race-skill-btn p-2 rounded text-xs transition-all ${
-                                        isSelected
+                                    data-race-weapon="${weapon}"
+                                    class="race-weapon-btn p-2 rounded text-sm transition-all ${
+                                        state.character.raceChoices.weapons?.[0] === weapon
                                             ? 'bg-green-500/20 border border-green-500 text-white'
                                             : 'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
                                     }"
                                 >
-                                    ${skill}
+                                    ${weapon}
                                 </button>
-                            `;
-                        }).join('')}
+                            `).join('')}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
+            
+            return html;
         }
 
         function renderOrigins() {
@@ -979,22 +1135,29 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         <div>
                             <h3 class="text-sm font-semibold text-gray-400 mb-2">Biome Origins</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-96 overflow-y-auto p-1">
-                                ${gameData.origins.biome.map(origin => `
-                                    <button
-                                        data-origin="${origin.name}"
-                                        data-origin-type="biome"
-                                        class="origin-btn p-3 text-left rounded border transition-all ${
-                                            state.character.origins.includes(origin.name)
-                                                ? 'border-blue-500 bg-blue-500/20'
-                                                : 'border-gray-600 bg-gray-800 hover:border-gray-500'
-                                        }"
-                                        ${state.character.origins.includes(origin.name) || (state.character.origins.length >= 2 || state.character.origins.some(o => gameData.origins.biome.find(b => b.name === o))) ? 'disabled' : ''}
-                                    >
-                                        <div class="font-semibold text-sm text-white">${origin.name}</div>
-                                        <div class="text-xs text-green-400 mt-1">${origin.attribute}</div>
-                                        <div class="text-xs text-gray-400">${origin.ability}</div>
-                                    </button>
-                                `).join('')}
+                                ${gameData.origins.biome.map(origin => {
+                                    const isSelected = state.character.origins.includes(origin.name);
+                                    const hasBiome = state.character.origins.some(o => gameData.origins.biome.find(b => b.name === o));
+                                    const disabled = !isSelected && (state.character.origins.length >= 2 || hasBiome);
+                                    
+                                    return `
+                                        <button
+                                            data-origin="${origin.name}"
+                                            data-origin-type="biome"
+                                            class="origin-btn p-3 text-left rounded border transition-all ${
+                                                isSelected
+                                                    ? 'border-blue-500 bg-blue-500/20'
+                                                    : disabled
+                                                    ? 'border-gray-600 bg-gray-800 opacity-50'
+                                                    : 'border-gray-600 bg-gray-800 hover:border-gray-500'
+                                            }"
+                                        >
+                                            <div class="font-semibold text-sm text-white">${origin.name}</div>
+                                            <div class="text-xs text-green-400 mt-1">${origin.attribute}</div>
+                                            <div class="text-xs text-gray-400">${origin.ability}</div>
+                                        </button>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
 
@@ -1002,26 +1165,38 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                             <h3 class="text-sm font-semibold text-gray-400 mb-2">Background Origins</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-96 overflow-y-auto p-1">
                                 ${gameData.origins.background.map(origin => {
-                                    const disabled = state.character.origins.includes(origin.name) || 
-                                        (state.character.origins.length >= 2 || state.character.origins.some(o => gameData.origins.background.find(b => b.name === o))) ||
-                                        (origin.name === 'Former Host' && state.character.race === 'Jaffa');
+                                    const isSelected = state.character.origins.includes(origin.name);
+                                    const hasBackground = state.character.origins.some(o => gameData.origins.background.find(b => b.name === o));
+                                    const isIncompatible = origin.name === 'Former Host' && state.character.race === 'Jaffa';
+                                    const disabled = !isSelected && (state.character.origins.length >= 2 || hasBackground || isIncompatible);
                                     
                                     return `
                                         <button
                                             data-origin="${origin.name}"
                                             data-origin-type="background"
                                             class="origin-btn p-3 text-left rounded border transition-all ${
-                                                state.character.origins.includes(origin.name)
+                                                isSelected
                                                     ? 'border-blue-500 bg-blue-500/20'
+                                                    : isIncompatible
+                                                    ? 'border-red-600 bg-red-900/20 opacity-50 cursor-not-allowed'
                                                     : disabled
-                                                    ? 'border-gray-600 bg-gray-800 opacity-50 cursor-not-allowed'
+                                                    ? 'border-gray-600 bg-gray-800 opacity-50'
                                                     : 'border-gray-600 bg-gray-800 hover:border-gray-500'
                                             }"
-                                            ${disabled ? 'disabled' : ''}
                                         >
-                                            <div class="font-semibold text-sm text-white">${origin.name}</div>
+                                            <div class="font-semibold text-sm text-white flex items-center gap-2">
+                                                ${origin.name}
+                                                ${isIncompatible ? `
+                                                    <span class="text-xs text-red-400">(Incompatible with Jaffa)</span>
+                                                ` : ''}
+                                            </div>
                                             <div class="text-xs text-green-400 mt-1">
-                                                Prof: ${typeof origin.proficiency === 'object' ? 'Choose' : origin.proficiency}
+                                                Prof: ${typeof origin.proficiency === 'object' ? 
+                                                    (origin.proficiency.options[0] === 'Weapon' ? 'Choose Weapon' :
+                                                     origin.proficiency.options[0] === 'Armor' ? 'Choose Armor' :
+                                                     origin.proficiency.options[0] === 'Tool' ? 'Choose Tool' :
+                                                     'Choose') : 
+                                                    origin.proficiency}
                                             </div>
                                             <div class="text-xs text-gray-400">${origin.ability}</div>
                                         </button>
@@ -1029,6 +1204,43 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                                 }).join('')}
                             </div>
                         </div>
+                        
+                        ${state.character.race && gameData.origins.racial[state.character.race] ? `
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-400 mb-2">Racial Origins (${state.character.race})</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    ${gameData.origins.racial[state.character.race].map(origin => {
+                                        const isSelected = state.character.origins.includes(origin.name);
+                                        const disabled = !isSelected && state.character.origins.length >= 2;
+                                        
+                                        return `
+                                            <button
+                                                data-origin="${origin.name}"
+                                                data-origin-type="racial"
+                                                class="origin-btn p-3 text-left rounded border transition-all ${
+                                                    isSelected
+                                                        ? 'border-blue-500 bg-blue-500/20'
+                                                        : disabled
+                                                        ? 'border-gray-600 bg-gray-800 opacity-50'
+                                                        : 'border-gray-600 bg-gray-800 hover:border-gray-500'
+                                                }"
+                                            >
+                                                <div class="font-semibold text-sm text-white">${origin.name}</div>
+                                                <div class="text-xs text-green-400 mt-1">
+                                                    ${origin.attribute}
+                                                    ${origin.proficiency ? `
+                                                        <span class="ml-2">
+                                                            | Prof: ${origin.proficiency?.type === 'choice' ? origin.proficiency.options.join('/') : origin.proficiency}
+                                                        </span>
+                                                    ` : ''}
+                                                </div>
+                                                <div class="text-xs text-gray-400">${origin.ability}</div>
+                                            </button>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
 
                     ${state.character.origins.length > 0 ? `
@@ -1053,25 +1265,40 @@ ${state.character.classFeats.join('\n') || 'None selected'}
             
             state.character.origins.forEach(originName => {
                 const backgroundOrigin = gameData.origins.background.find(o => o.name === originName);
+                const racialOrigin = gameData.origins.racial[state.character.race]?.find(o => o.name === originName);
+                const origin = backgroundOrigin || racialOrigin;
                 
-                if (backgroundOrigin?.proficiency?.type === 'choice') {
+                if (origin?.proficiency?.type === 'choice') {
+                    const options = origin.proficiency.options;
+                    let items = [];
+                    
+                    if (options.includes('Weapon')) {
+                        items = gameData.availableWeapons;
+                    } else if (options.includes('Armor')) {
+                        items = gameData.availableArmor;
+                    } else if (options.includes('Tool')) {
+                        items = gameData.availableTools;
+                    } else if (options.includes('Martial Arts') || options.includes('Longarms') || options.includes('Heavy Armor')) {
+                        items = options;
+                    }
+                    
                     html += `
                         <div class="bg-gray-700/50 rounded-lg p-4">
                             <label class="block text-sm font-medium text-gray-300 mb-2">
                                 Choose ${originName} Proficiency
                             </label>
                             <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                ${gameData.availableTools.map(tool => `
+                                ${items.map(item => `
                                     <button
                                         data-origin-choice="${originName}"
-                                        data-choice-value="${tool}"
+                                        data-choice-value="${item}"
                                         class="origin-choice-btn p-2 rounded text-sm transition-all ${
-                                            state.character.originChoices[originName] === tool
+                                            state.character.originChoices[originName] === item
                                                 ? 'bg-green-500/20 border border-green-500 text-white'
                                                 : 'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
                                         }"
                                     >
-                                        ${tool}
+                                        ${item}
                                     </button>
                                 `).join('')}
                             </div>
@@ -1117,8 +1344,8 @@ ${state.character.classFeats.join('\n') || 'None selected'}
             return `
                 <div class="bg-gray-700/50 rounded-lg p-4">
                     <h3 class="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                        ${icons.bookOpen}
-                        ${state.character.class} Class Proficiencies
+                        <span class="icon icon-md">${icons.bookOpen}</span>
+                        ${state.character.class} Class Proficiencies & Bonuses
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div class="bg-gray-800 rounded p-3">
@@ -1198,10 +1425,10 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         class="flex items-center justify-between cursor-pointer"
                     >
                         <h3 class="text-lg font-semibold text-gray-300 flex items-center gap-2">
-                            ${icons.bookOpen}
+                            <span class="icon icon-lg">${icons.bookOpen}</span>
                             ${state.character.class} Class Abilities (Levels 1-${state.character.level})
                         </h3>
-                        <span class="${state.showClassAbilities ? 'rotate-180' : ''} transition-transform">
+                        <span class="${state.showClassAbilities ? 'rotate-180' : ''} transition-transform icon icon-lg">
                             ${icons.chevronDown}
                         </span>
                     </div>
@@ -1216,13 +1443,25 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                                             Level ${level}
                                         </div>
                                         <div class="space-y-2">
-                                            ${abilities.filter(a => !a.includes('Choose') && !a.includes('Ability Score')).map(ability => `
-                                                <div class="pl-2 border-l-2 border-gray-700">
-                                                    <div class="text-sm text-white">
-                                                        ${ability}
+                                            ${abilities.filter(a => !a.includes('Choose') && !a.includes('Ability Score')).map(ability => {
+                                                const colonIndex = ability.indexOf('(');
+                                                const hasDescription = colonIndex !== -1;
+                                                const abilityName = hasDescription ? ability.substring(0, colonIndex).trim() : ability;
+                                                const abilityDesc = hasDescription ? ability.substring(colonIndex).trim() : '';
+                                                
+                                                return `
+                                                    <div class="pl-2 border-l-2 border-gray-700">
+                                                        <div class="text-sm font-medium text-white">
+                                                            ${abilityName}
+                                                        </div>
+                                                        ${abilityDesc ? `
+                                                            <div class="text-xs text-gray-400 mt-1">
+                                                                ${abilityDesc}
+                                                            </div>
+                                                        ` : ''}
                                                     </div>
-                                                </div>
-                                            `).join('')}
+                                                `;
+                                            }).join('')}
                                         </div>
                                     </div>
                                 `).join('')}
@@ -1259,17 +1498,17 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         class="flex items-center justify-between cursor-pointer"
                     >
                         <h3 class="text-lg font-semibold text-gray-300 flex items-center gap-2">
-                            ${icons.sparkles}
+                            <span class="icon icon-lg">${icons.sparkles}</span>
                             Class Feat Selection
                         </h3>
-                        <span class="${state.showClassFeats ? 'rotate-180' : ''} transition-transform">
+                        <span class="${state.showClassFeats ? 'rotate-180' : ''} transition-transform icon icon-lg">
                             ${icons.chevronDown}
                         </span>
                     </div>
                     
                     ${state.showClassFeats ? `
                         <p class="text-sm text-gray-400 mb-4 mt-3">
-                            Select ${requiredFeats} feat${requiredFeats > 1 ? 's' : ''} for your ${state.character.class}
+                            Select ${requiredFeats} ${state.character.class === 'Scout' ? 'Field Hack' : featType} feat${requiredFeats > 1 ? 's' : ''} for your ${state.character.class}
                         </p>
                         
                         <div class="space-y-2">
@@ -1287,13 +1526,12 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                                                 ? 'border-gray-600 bg-gray-800 hover:border-gray-500'
                                                 : 'border-gray-700 bg-gray-900/50 opacity-50 cursor-not-allowed'
                                         }"
-                                        ${!isSelected && !canSelect ? 'disabled' : ''}
                                     >
                                         <div class="flex justify-between items-start">
                                             <div class="flex-1">
                                                 <div class="font-semibold text-sm text-white">${feat.name}</div>
                                                 <div class="text-xs text-gray-400 mt-1">${feat.description}</div>
-                                                ${feat.requirements ? `
+                                                ${feat.requirements && feat.requirements !== 'None' ? `
                                                     <div class="text-xs text-yellow-400 mt-1">Requirements: ${feat.requirements}</div>
                                                 ` : ''}
                                             </div>
@@ -1320,7 +1558,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
             return `
                 <div class="bg-gray-700/50 rounded-lg p-4">
                     <h3 class="text-lg font-semibold text-gray-300 mb-3 flex items-center gap-2">
-                        ${icons.award}
+                        <span class="icon icon-lg">${icons.award}</span>
                         Bonus Feat - Attack Specialist (Level 5)
                     </h3>
                     <p class="text-sm text-gray-400 mb-3">
@@ -1358,12 +1596,12 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                                 class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white"
                             >
                                 <option value="">Select ability...</option>
-                                <option value="strength_2">Strength +2</option>
-                                <option value="dexterity_2">Dexterity +2</option>
-                                <option value="constitution_2">Constitution +2</option>
-                                <option value="intelligence_2">Intelligence +2</option>
-                                <option value="wisdom_2">Wisdom +2</option>
-                                <option value="charisma_2">Charisma +2</option>
+                                <option value="strength_2" ${state.character.abilityScoreImprovements?.option1 === 'strength_2' ? 'selected' : ''}>Strength +2</option>
+                                <option value="dexterity_2" ${state.character.abilityScoreImprovements?.option1 === 'dexterity_2' ? 'selected' : ''}>Dexterity +2</option>
+                                <option value="constitution_2" ${state.character.abilityScoreImprovements?.option1 === 'constitution_2' ? 'selected' : ''}>Constitution +2</option>
+                                <option value="intelligence_2" ${state.character.abilityScoreImprovements?.option1 === 'intelligence_2' ? 'selected' : ''}>Intelligence +2</option>
+                                <option value="wisdom_2" ${state.character.abilityScoreImprovements?.option1 === 'wisdom_2' ? 'selected' : ''}>Wisdom +2</option>
+                                <option value="charisma_2" ${state.character.abilityScoreImprovements?.option1 === 'charisma_2' ? 'selected' : ''}>Charisma +2</option>
                             </select>
                         </div>
                         <div>
@@ -1376,24 +1614,24 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                                     class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white"
                                 >
                                     <option value="">First ability +1...</option>
-                                    <option value="strength">Strength +1</option>
-                                    <option value="dexterity">Dexterity +1</option>
-                                    <option value="constitution">Constitution +1</option>
-                                    <option value="intelligence">Intelligence +1</option>
-                                    <option value="wisdom">Wisdom +1</option>
-                                    <option value="charisma">Charisma +1</option>
+                                    <option value="strength" ${state.character.abilityScoreImprovements?.option2a === 'strength' ? 'selected' : ''}>Strength +1</option>
+                                    <option value="dexterity" ${state.character.abilityScoreImprovements?.option2a === 'dexterity' ? 'selected' : ''}>Dexterity +1</option>
+                                    <option value="constitution" ${state.character.abilityScoreImprovements?.option2a === 'constitution' ? 'selected' : ''}>Constitution +1</option>
+                                    <option value="intelligence" ${state.character.abilityScoreImprovements?.option2a === 'intelligence' ? 'selected' : ''}>Intelligence +1</option>
+                                    <option value="wisdom" ${state.character.abilityScoreImprovements?.option2a === 'wisdom' ? 'selected' : ''}>Wisdom +1</option>
+                                    <option value="charisma" ${state.character.abilityScoreImprovements?.option2a === 'charisma' ? 'selected' : ''}>Charisma +1</option>
                                 </select>
                                 <select
                                     id="asi-option2b"
                                     class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white"
                                 >
                                     <option value="">Second ability +1...</option>
-                                    <option value="strength">Strength +1</option>
-                                    <option value="dexterity">Dexterity +1</option>
-                                    <option value="constitution">Constitution +1</option>
-                                    <option value="intelligence">Intelligence +1</option>
-                                    <option value="wisdom">Wisdom +1</option>
-                                    <option value="charisma">Charisma +1</option>
+                                    <option value="strength" ${state.character.abilityScoreImprovements?.option2b === 'strength' ? 'selected' : ''}>Strength +1</option>
+                                    <option value="dexterity" ${state.character.abilityScoreImprovements?.option2b === 'dexterity' ? 'selected' : ''}>Dexterity +1</option>
+                                    <option value="constitution" ${state.character.abilityScoreImprovements?.option2b === 'constitution' ? 'selected' : ''}>Constitution +1</option>
+                                    <option value="intelligence" ${state.character.abilityScoreImprovements?.option2b === 'intelligence' ? 'selected' : ''}>Intelligence +1</option>
+                                    <option value="wisdom" ${state.character.abilityScoreImprovements?.option2b === 'wisdom' ? 'selected' : ''}>Wisdom +1</option>
+                                    <option value="charisma" ${state.character.abilityScoreImprovements?.option2b === 'charisma' ? 'selected' : ''}>Charisma +1</option>
                                 </select>
                             </div>
                         </div>
@@ -1477,7 +1715,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div class="bg-gray-800 rounded-lg p-3">
                             <div class="flex items-center gap-2 text-red-400 mb-1">
-                                ${icons.heart}
+                                <span class="icon icon-md">${icons.heart}</span>
                                 <span class="text-xs">Hit Points</span>
                             </div>
                             <div class="text-2xl font-bold text-white">${state.character.hp || 0}</div>
@@ -1492,7 +1730,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         
                         <div class="bg-gray-800 rounded-lg p-3">
                             <div class="flex items-center gap-2 text-blue-400 mb-1">
-                                ${icons.shield}
+                                <span class="icon icon-md">${icons.shield}</span>
                                 <span class="text-xs">Armor Class</span>
                             </div>
                             <div class="text-2xl font-bold text-white">${state.character.armorClass}</div>
@@ -1504,7 +1742,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         
                         <div class="bg-gray-800 rounded-lg p-3">
                             <div class="flex items-center gap-2 text-yellow-400 mb-1">
-                                ${icons.zap}
+                                <span class="icon icon-md">${icons.zap}</span>
                                 <span class="text-xs">Initiative</span>
                             </div>
                             <div class="text-2xl font-bold text-white">
@@ -1519,7 +1757,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         
                         <div class="bg-gray-800 rounded-lg p-3">
                             <div class="flex items-center gap-2 text-purple-400 mb-1">
-                                ${icons.brain}
+                                <span class="icon icon-md">${icons.brain}</span>
                                 <span class="text-xs">Determination</span>
                             </div>
                             <div class="text-2xl font-bold text-white">${state.character.determinationPoints}</div>
@@ -1530,7 +1768,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         
                         <div class="bg-gray-800 rounded-lg p-3">
                             <div class="flex items-center gap-2 text-green-400 mb-1">
-                                ${icons.activity}
+                                <span class="icon icon-md">${icons.activity}</span>
                                 <span class="text-xs">Speed</span>
                             </div>
                             <div class="text-2xl font-bold text-white">${state.character.speed}m</div>
@@ -1542,7 +1780,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         
                         <div class="bg-gray-800 rounded-lg p-3">
                             <div class="flex items-center gap-2 text-cyan-400 mb-1">
-                                ${icons.user}
+                                <span class="icon icon-md">${icons.user}</span>
                                 <span class="text-xs">Moxie</span>
                             </div>
                             <div class="text-2xl font-bold text-white">
@@ -1577,7 +1815,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                         class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 ${!isComplete ? 'opacity-50 cursor-not-allowed' : ''}"
                         ${!isComplete ? 'disabled' : ''}
                     >
-                        ${icons.download}
+                        <span class="icon icon-lg">${icons.download}</span>
                         Export Character Sheet
                     </button>
                 </div>
@@ -1644,28 +1882,64 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                 });
             });
 
-            // Origins
+            // Additional skills (for Tollan)
+            document.querySelectorAll('.additional-skill-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const skill = btn.dataset.additionalSkill;
+                    if (!state.character.raceChoices.additionalSkills) {
+                        state.character.raceChoices.additionalSkills = [];
+                    }
+                    
+                    const raceData = gameData.races[state.character.race]?.subraces[state.character.subrace];
+                    const maxSkills = raceData?.proficiencies?.skills?.additionalChoice?.count || 1;
+                    
+                    if (state.character.raceChoices.additionalSkills.includes(skill)) {
+                        state.character.raceChoices.additionalSkills = state.character.raceChoices.additionalSkills.filter(s => s !== skill);
+                    } else if (state.character.raceChoices.additionalSkills.length < maxSkills) {
+                        state.character.raceChoices.additionalSkills.push(skill);
+                    }
+                    
+                    render();
+                });
+            });
+
+            // Race weapons
+            document.querySelectorAll('.race-weapon-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const weapon = btn.dataset.raceWeapon;
+                    state.character.raceChoices.weapons = [weapon];
+                    render();
+                });
+            });
+
+            // Origins - updated to allow deselection
             document.querySelectorAll('.origin-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const originName = btn.dataset.origin;
                     const originType = btn.dataset.originType;
                     
-                    if (state.character.origins.length < 2) {
+                    if (state.character.origins.includes(originName)) {
+                        // Deselect
+                        state.character.origins = state.character.origins.filter(o => o !== originName);
+                        delete state.character.originChoices[originName];
+                    } else if (state.character.origins.length < 2) {
                         // Check if we already have an origin from this category
-                        const hasFromCategory = state.character.origins.some(o => {
-                            if (originType === 'biome') {
-                                return gameData.origins.biome.find(b => b.name === o);
-                            } else if (originType === 'background') {
-                                return gameData.origins.background.find(b => b.name === o);
-                            }
-                            return false;
-                        });
+                        let hasFromCategory = false;
+                        if (originType === 'biome') {
+                            hasFromCategory = state.character.origins.some(o => 
+                                gameData.origins.biome.find(b => b.name === o)
+                            );
+                        } else if (originType === 'background') {
+                            hasFromCategory = state.character.origins.some(o => 
+                                gameData.origins.background.find(b => b.name === o)
+                            );
+                        }
                         
                         if (!hasFromCategory) {
                             state.character.origins.push(originName);
-                            render();
                         }
                     }
+                    render();
                 });
             });
 
@@ -1730,7 +2004,7 @@ ${state.character.classFeats.join('\n') || 'None selected'}
                 });
             }
 
-            // Class feats
+            // Class feats - allow deselection
             document.querySelectorAll('.feat-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const featName = btn.dataset.feat;
