@@ -421,6 +421,10 @@
         `;
 
         const render = () => {
+            // Preserve scroll position
+            const scrollY = window.scrollY;
+            const scrollX = window.scrollX;
+            
             updateDerivedStats();
             
             // Update duplicate proficiency tracking
@@ -450,6 +454,11 @@
             `;
             
             attachEventListeners();
+            
+            // Restore scroll position after rendering
+            requestAnimationFrame(() => {
+                window.scrollTo(scrollX, scrollY);
+            });
         };
 
         const renderSections = () => {
@@ -958,10 +967,17 @@
                                         ${disabled ? 'disabled' : ''}
                                     >
                                         ${skill}
+                                        ${isSelected ? ` (#${selectedIndex + 1})` : ''}
                                     </button>
                                 `;
                             }).join('')}
                         </div>
+                        
+                        ${c.duplicateProficiencyChoices.filter(s => s).length > 0 ? `
+                            <div class="mt-3 text-xs text-gray-400">
+                                <strong>Current replacements:</strong> ${c.duplicateProficiencyChoices.filter(s => s).map((s, i) => `#${i + 1}: ${s}`).join(', ')}
+                            </div>
+                        ` : ''}
                     </div>
                     
                     <div class="mt-4 p-3 bg-gray-800/50 rounded">
