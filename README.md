@@ -1,4 +1,4 @@
-# Stargate RPG Character Builder
+# Stargate RPG Character Builder v1.0.1
 
 A web-based character creation tool for the Stargate SG-1 tabletop RPG system, specifically designed for creating Phoenix Site operatives (Levels 1-5).
 
