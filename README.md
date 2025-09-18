@@ -2,6 +2,8 @@
 
 A web-based character creation tool for the Stargate SG-1 tabletop RPG system, specifically designed for creating Phoenix Site operatives (Levels 1-5).
 
+[Link to the Character Builder](https://onyx-timaeus.github.io/StargateRPG-Character-Builder/)
+
 ## 📜 What It Does
 
 This interactive character builder allows you to create fully-featured characters for the Stargate RPG with:
