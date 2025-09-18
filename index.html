@@ -1066,16 +1066,21 @@
                     if (!hasType) c.origins.push(name);
                 }
                 state.character.duplicateProficiencyChoices = [];
+                
+                // Add a class to prevent visual glitch
+                document.getElementById('app').style.opacity = '0.99';
+                
                 render();
                 
                 // Restore scroll positions after render
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     document.querySelectorAll('.max-h-96.overflow-y-auto').forEach((el, index) => {
                         if (scrollPositions[index] !== undefined) {
                             el.scrollTop = scrollPositions[index];
                         }
                     });
-                }, 0);
+                    document.getElementById('app').style.opacity = '1';
+                });
             });
             
             on('.class-btn', 'click', e => {
