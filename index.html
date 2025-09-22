@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stargate RPG Character Builder - Fixed</title>
+    <title>Stargate RPG Character Builder - Optimized</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .transition-all { transition: all 0.3s ease; }
@@ -179,12 +179,12 @@
                     {name:'Enforcement',proficiency:'Intimidation',ability:'Air of Authority: Others have disadvantage to intimidate you'},
                     {name:'Aviator',proficiency:'Pilot',ability:'Crash Landing: Resistance to damage when vehicle crashes'},
                     {name:'Driver',proficiency:'Animal Handling',ability:'Speedster: Vehicles/animals you control gain +1 AC'},
-                    {name:'Enslaved',proficiency:{type:'choice',options:['Tool']},ability:'Friend to Toil: Suffer 1 less exhaustion level (min 1)'},
+                    {name:'Enslaved',proficiency:{type:'choice',options:['Tool'],description:'Choose one tool proficiency'},ability:'Friend to Toil: Suffer 1 less exhaustion level (min 1)'},
                     {name:'Former Host',ability:'Naquadah Blooded: Can use Goa\'uld tech, advantage vs symbiotes'},
                     {name:'Entertainer',proficiency:'Performance',ability:'Zeitgeist: Use Cha for art/performance understanding'},
                     {name:'Freedom Fighter',proficiency:'Stealth',ability:'Last Resorts: Disadvantage on Moxie, advantage on Initiative'},
                     {name:'Healer',proficiency:'Medicine',ability:'Soothe: Team heals +Prof bonus on rest'},
-                    {name:'Military',proficiency:{type:'choice',options:['Weapon','Armor']},ability:'Drills: +1 HP per level'},
+                    {name:'Military',proficiency:{type:'choice',options:['Weapon','Armor'],description:'Choose one weapon or armor proficiency'},ability:'Drills: +1 HP per level'},
                     {name:'Herdsman',proficiency:'Animal Handling',ability:'Beastfriend: Use Cha instead of Wis for Animal Handling'},
                     {name:'Preservationist',proficiency:'Nature',ability:'Eye for Nature: Advantage on checks to identify plants'},
                     {name:'Hunter/Gatherer',proficiency:'Survival',ability:'Irongut: Advantage vs poison'},
@@ -203,7 +203,7 @@
                     {name:'Student',proficiency:'Perception',ability:'Quick Study: 1/mission use Int save instead of another'}
                 ],
                 racial: {
-                    'Human': [{name:'Tau\'ri Military',attribute:'None',proficiency:{type:'choice',options:['Martial Arts','Longarms','Heavy Armor']},ability:'Basic Training: Chosen proficiency from military service',restrictedTo:['Standard Human (Tau\'ri)']}],
+                    'Human': [{name:'Tau\'ri Military',attribute:'None',proficiency:{type:'choice',options:['Martial Arts','Longarms','Heavy Armor'],description:'Choose one proficiency'},ability:'Basic Training: Chosen proficiency from military service',restrictedTo:['Standard Human (Tau\'ri)']}],
                     'Jaffa': [{name:'Jaffa Renegade',attribute:'Wisdom +1',ability:'Rebel: Advantage on saves vs Goa\'uld and Jaffa'},{name:'Student of Bra\'tac',attribute:'Dexterity +1',ability:'Ma\'tok Mastery: Ma\'tok gains finesse property'}],
                     'Aturen': [{name:'Aturen Spiritualist',attribute:'None',ability:'Ritual of Life: DC 20 Culture check to resurrect',restrictedTo:['Noxian Pacifist']}],
                     'Tok\'ra': [{name:'Tok\'ra Spy',attribute:'Charisma +1',ability:'Passing: Advantage on Deception as Human/Goa\'uld/Jaffa'}],
@@ -254,20 +254,48 @@
         const pointBuyCost = {8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
         const getPointsSpent = () => Object.values(state.character.abilityScores).reduce((sum, score) => sum + (pointBuyCost[score] || 0), 0);
 
+        // Helper function to find origin data
+        const findOrigin = (name) => {
+            for (const type of ['biome', 'background']) {
+                const found = gameData.origins[type].find(o => o.name === name);
+                if (found) return found;
+            }
+            for (const race in gameData.origins.racial) {
+                const found = gameData.origins.racial[race].find(o => o.name === name);
+                if (found) return found;
+            }
+            return null;
+        };
+
+        // Helper to get race data
+        const getRaceData = () => gameData.races[state.character.race]?.subraces?.[state.character.subrace];
+        const getClassData = () => gameData.classes[state.character.class];
+
         const isRacialOriginAvailable = (origin) => {
             if (!origin.restrictedTo) return true;
             return origin.restrictedTo.includes(state.character.subrace);
+        };
+
+        // Get proficiency display text for origins
+        const getOriginProficiencyDisplay = (origin) => {
+            if (!origin.proficiency) return '';
+            if (typeof origin.proficiency === 'string') return origin.proficiency;
+            if (origin.proficiency.type === 'choice') {
+                return origin.proficiency.description || 'Choose proficiency';
+            }
+            return '';
         };
 
         const getAllSkillProficiencies = () => {
             const skills = [];
             const c = state.character;
             
-            if (c.class) {
-                gameData.classes[c.class].proficiencies.skills.forEach(s => skills.push({skill:s, source:'Class'}));
+            const cd = getClassData();
+            if (cd) {
+                cd.proficiencies.skills.forEach(s => skills.push({skill:s, source:'Class'}));
             }
             
-            const rd = gameData.races[c.race]?.subraces?.[c.subrace];
+            const rd = getRaceData();
             if (rd?.proficiencies?.skills) {
                 if (rd.proficiencies.skills.type === 'mixed' && rd.proficiencies.skills.fixed) {
                     rd.proficiencies.skills.fixed.forEach(s => skills.push({skill:s, source:'Race'}));
@@ -281,9 +309,9 @@
             }
             
             c.origins.forEach(o => {
-                const bg = gameData.origins.background.find(b => b.name === o);
-                if (bg?.proficiency && typeof bg.proficiency === 'string' && gameData.skills.includes(bg.proficiency)) {
-                    skills.push({skill:bg.proficiency, source:o});
+                const origin = findOrigin(o);
+                if (origin?.proficiency && typeof origin.proficiency === 'string' && gameData.skills.includes(origin.proficiency)) {
+                    skills.push({skill:origin.proficiency, source:o});
                 }
             });
             
@@ -298,28 +326,19 @@
                 skillCounts[skill] = (skillCounts[skill] || 0) + 1;
             });
             
-            let totalReplacements = 0;
-            const duplicateSkills = [];
-            
-            Object.entries(skillCounts).forEach(([skill, count]) => {
-                if (count > 1) {
-                    const duplicates = count - 1;
-                    totalReplacements += duplicates;
-                    duplicateSkills.push({skill, duplicates});
-                }
-            });
+            const totalReplacements = Object.values(skillCounts).reduce((sum, count) => sum + Math.max(0, count - 1), 0);
+            const duplicateSkills = Object.entries(skillCounts)
+                .filter(([_, count]) => count > 1)
+                .map(([skill, count]) => ({skill, duplicates: count - 1}));
             
             return { totalReplacements, duplicateSkills, skillCounts };
         };
 
         const getFinalSkillProficiencies = () => {
             const skills = new Set();
-            const { duplicateSkills, skillCounts } = getDuplicateAnalysis();
+            const { skillCounts } = getDuplicateAnalysis();
             
-            Object.keys(skillCounts).forEach(skill => {
-                skills.add(skill);
-            });
-            
+            Object.keys(skillCounts).forEach(skill => skills.add(skill));
             state.character.duplicateProficiencyChoices.forEach(skill => {
                 if (skill) skills.add(skill);
             });
@@ -335,19 +354,18 @@
         const getAbilityBonuses = ability => {
             let racial = 0, origin = 0, asi = 0;
             const c = state.character;
-            const rd = gameData.races[c.race]?.subraces?.[c.subrace];
+            const rd = getRaceData();
             
             if (rd?.abilityIncrease?.type === 'choice' && c.abilityChoice === ability) {
                 racial = rd.abilityIncrease.value;
             }
             
-            c.origins.forEach(o => {
-                [...gameData.origins.biome, ...Object.values(gameData.origins.racial).flat()].forEach(orig => {
-                    if (orig.name === o && orig.attribute !== 'None') {
-                        const [attr, val] = orig.attribute.split(' +');
-                        if (attr.toLowerCase() === ability) origin += parseInt(val);
-                    }
-                });
+            c.origins.forEach(oName => {
+                const orig = findOrigin(oName);
+                if (orig?.attribute && orig.attribute !== 'None') {
+                    const [attr, val] = orig.attribute.split(' +');
+                    if (attr.toLowerCase() === ability) origin += parseInt(val);
+                }
             });
             
             if (c.level >= 4) {
@@ -371,8 +389,8 @@
 
         const updateDerivedStats = () => {
             const c = state.character;
-            const rd = gameData.races[c.race]?.subraces?.[c.subrace];
-            const cd = gameData.classes[c.class];
+            const rd = getRaceData();
+            const cd = getClassData();
             const fs = getFinalAbilityScores();
             const mods = Object.fromEntries(Object.entries(fs).map(([k,v]) => [k, getModifier(v)]));
             
@@ -416,8 +434,8 @@
 
         const exportCharacter = () => {
             const c = state.character;
-            const rd = gameData.races[c.race]?.subraces?.[c.subrace];
-            const cd = gameData.classes[c.class];
+            const rd = getRaceData();
+            const cd = getClassData();
             const fs = getFinalAbilityScores();
             
             // Collect all class abilities with descriptions
@@ -454,10 +472,7 @@
             // Collect origins with effects
             let originsWithEffects = [];
             c.origins.forEach(originName => {
-                let origin = null;
-                gameData.origins.biome.forEach(o => { if (o.name === originName) origin = o; });
-                gameData.origins.background.forEach(o => { if (o.name === originName) origin = o; });
-                Object.values(gameData.origins.racial).flat().forEach(o => { if (o.name === originName) origin = o; });
+                const origin = findOrigin(originName);
                 
                 if (origin) {
                     let effects = [];
@@ -559,6 +574,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             a.click();
         };
 
+        // Rendering helper
         const section = (title, content, highlight = false) => `
             <div class="${highlight ? 'bg-yellow-500/20 border-2 border-yellow-500' : 'bg-gray-700/50'} rounded-lg p-4">
                 ${title ? `<label class="block text-sm font-medium ${highlight ? 'text-yellow-300' : 'text-gray-300'} mb-2">${title}</label>` : ''}
@@ -566,6 +582,16 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             </div>
         `;
 
+        // Button renderer
+        const renderButton = (data, selected, disabled = false, classes = '') => {
+            const baseClasses = 'p-3 rounded-lg border-2 transition-all';
+            const stateClasses = selected ? 'border-blue-500 bg-blue-500/20 text-white' : 
+                                disabled ? 'border-gray-600 bg-gray-800 opacity-50 cursor-not-allowed' :
+                                'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500';
+            return `${baseClasses} ${stateClasses} ${classes}`;
+        };
+
+        // Main render function
         const render = () => {
             updateDerivedStats();
             
@@ -598,8 +624,8 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
 
         const renderSections = () => {
             const c = state.character;
-            const rd = gameData.races[c.race]?.subraces?.[c.subrace];
-            const cd = gameData.classes[c.class];
+            const rd = getRaceData();
+            const cd = getClassData();
             const { totalReplacements, duplicateSkills } = getDuplicateAnalysis();
             const ps = getPointsSpent();
             
@@ -614,9 +640,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             sections.push(section('Select Race', `
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     ${Object.keys(gameData.races).map(race => `
-                        <button data-race="${race}" class="race-btn p-3 rounded-lg border-2 transition-all ${
-                            c.race === race ? 'border-blue-500 bg-blue-500/20 text-white' : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
-                        }">
+                        <button data-race="${race}" class="race-btn ${renderButton(null, c.race === race)}">
                             <div class="font-semibold">${race}</div>
                             <div class="text-xs mt-1 opacity-75">${Object.keys(gameData.races[race].subraces).length} variant(s)</div>
                         </button>
@@ -750,7 +774,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                 sections.push(section(rd.proficiencies.skills.type === 'choice' ? `Choose ${rd.proficiencies.skills.count} Skill Proficienc${rd.proficiencies.skills.count > 1 ? 'ies' : 'y'}` : 'Skill Proficiencies', skillContent));
             }
             
-            // Origins
+            // Origins with improved proficiency display
             sections.push(section('Select Origins (Choose 2 from different categories)', `
                 ${['biome', 'background'].map(type => `
                     <div class="mb-4">
@@ -761,6 +785,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                                 const hasType = c.origins.some(x => gameData.origins[type].find(y => y.name === x));
                                 const dis = !sel && (c.origins.length >= 2 || hasType);
                                 const isIncompatible = o.name === 'Former Host' && c.race === 'Jaffa';
+                                const proficiencyDisplay = getOriginProficiencyDisplay(o);
                                 
                                 return `
                                     <button data-origin="${o.name}" data-origin-type="${type}" class="origin-btn p-3 text-left rounded border transition-all ${
@@ -774,7 +799,8 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                                             ${isIncompatible ? '<span class="text-xs text-red-400">(Incompatible with Jaffa)</span>' : ''}
                                         </div>
                                         <div class="text-xs text-green-400 mt-1">
-                                            ${o.attribute || (typeof o.proficiency === 'string' ? o.proficiency : o.proficiency?.type === 'choice' ? 'Choose' : '')}
+                                            ${o.attribute !== 'None' && o.attribute ? o.attribute : ''}
+                                            ${proficiencyDisplay ? (o.attribute && o.attribute !== 'None' ? ' | ' : '') + proficiencyDisplay : ''}
                                         </div>
                                         <div class="text-xs text-gray-400">${o.ability}</div>
                                     </button>
@@ -792,6 +818,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                                 const sel = c.origins.includes(o.name);
                                 const disabled = !sel && c.origins.length >= 2;
                                 const notAvailable = !isRacialOriginAvailable(o);
+                                const proficiencyDisplay = getOriginProficiencyDisplay(o);
                                 
                                 return `
                                     <button data-origin="${o.name}" data-origin-type="racial" class="origin-btn p-3 text-left rounded border transition-all ${
@@ -805,8 +832,8 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                                             ${notAvailable ? `<span class="text-xs text-red-400">(Only for ${o.restrictedTo.join(', ')})</span>` : ''}
                                         </div>
                                         <div class="text-xs text-green-400 mt-1">
-                                            ${o.attribute}
-                                            ${o.proficiency ? ` | Prof: ${o.proficiency?.type === 'choice' ? o.proficiency.options.join('/') : o.proficiency}` : ''}
+                                            ${o.attribute !== 'None' && o.attribute ? o.attribute : ''}
+                                            ${proficiencyDisplay ? (o.attribute && o.attribute !== 'None' ? ' | ' : '') + proficiencyDisplay : ''}
                                         </div>
                                         <div class="text-xs text-gray-400">${o.ability}</div>
                                     </button>
@@ -819,17 +846,13 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             
             // Origin proficiency choices (e.g. Military's weapon/armor choice)
             const originsWithChoices = c.origins.filter(o => {
-                const bg = gameData.origins.background.find(b => b.name === o);
-                const racial = Object.values(gameData.origins.racial).flat().find(r => r.name === o);
-                const origin = bg || racial;
+                const origin = findOrigin(o);
                 return origin?.proficiency?.type === 'choice';
             });
             
             if (originsWithChoices.length > 0) {
                 sections.push(section('Origin Proficiency Choices', originsWithChoices.map(originName => {
-                    const bg = gameData.origins.background.find(b => b.name === originName);
-                    const racial = Object.values(gameData.origins.racial).flat().find(r => r.name === originName);
-                    const origin = bg || racial;
+                    const origin = findOrigin(originName);
                     
                     if (!origin?.proficiency?.options) return '';
                     
@@ -840,7 +863,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                         return `
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    Military Origin - Choose Weapon or Armor Proficiency:
+                                    Military Origin - Choose one weapon or armor proficiency:
                                 </label>
                                 <div class="mb-2">
                                     <div class="text-xs text-gray-400 mb-2">Weapon Proficiencies:</div>
@@ -878,7 +901,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                         return `
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    Enslaved Origin - Choose Tool Proficiency:
+                                    Enslaved Origin - Choose one tool proficiency:
                                 </label>
                                 <div class="grid grid-cols-3 gap-2">
                                     ${gameData.tools.map(tool => `
@@ -898,7 +921,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                         return `
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    Tau'ri Military - Choose Proficiency:
+                                    Tau'ri Military - Choose one proficiency:
                                 </label>
                                 <div class="grid grid-cols-3 gap-2">
                                     ${origin.proficiency.options.map(opt => `
@@ -924,9 +947,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             sections.push(section('Select Class', `
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     ${Object.entries(gameData.classes).map(([name, data]) => `
-                        <button data-class="${name}" class="class-btn p-3 rounded-lg border-2 transition-all ${
-                            c.class === name ? 'border-purple-500 bg-purple-500/20 text-white' : 'border-gray-600 bg-gray-800 text-gray-300 hover:border-gray-500'
-                        }">
+                        <button data-class="${name}" class="class-btn ${renderButton(null, c.class === name, false, 'border-purple-500 bg-purple-500/20')}">
                             <div class="font-semibold">${name}</div>
                             <div class="text-xs mt-1 opacity-75">HD: d${data.hitDie}, DP: +${data.determinationBonus}</div>
                         </button>
@@ -1258,7 +1279,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             return sections.join('');
         };
 
-        // Event listeners
+        // Event listeners (optimized)
         const attachEventListeners = () => {
             const on = (sel, evt, fn) => document.querySelectorAll(sel).forEach(el => el.addEventListener(evt, fn));
             
@@ -1289,7 +1310,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             on('.race-weapon-btn', 'click', e => {
                 const w = e.currentTarget.dataset.raceWeapon;
                 const weapons = state.character.raceChoices.weapons || [];
-                const max = gameData.races[state.character.race]?.subraces?.[state.character.subrace]?.proficiencies?.weapons?.count || 1;
+                const max = getRaceData()?.proficiencies?.weapons?.count || 1;
                 
                 if (weapons.includes(w)) {
                     state.character.raceChoices.weapons = weapons.filter(x => x !== w);
@@ -1302,7 +1323,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             on('.race-skill-btn', 'click', e => {
                 const s = e.currentTarget.dataset.raceSkill;
                 const skills = state.character.raceChoices.skills || [];
-                const max = gameData.races[state.character.race]?.subraces?.[state.character.subrace]?.proficiencies?.skills?.count || 1;
+                const max = getRaceData()?.proficiencies?.skills?.count || 1;
                 
                 if (skills.includes(s)) {
                     state.character.raceChoices.skills = skills.filter(x => x !== s);
@@ -1316,7 +1337,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             on('.additional-skill-btn', 'click', e => {
                 const s = e.currentTarget.dataset.additionalSkill;
                 const skills = state.character.raceChoices.additionalSkills || [];
-                const max = gameData.races[state.character.race]?.subraces?.[state.character.subrace]?.proficiencies?.skills?.additionalChoice?.count || 1;
+                const max = getRaceData()?.proficiencies?.skills?.additionalChoice?.count || 1;
                 
                 if (skills.includes(s)) {
                     state.character.raceChoices.additionalSkills = skills.filter(x => x !== s);
@@ -1358,9 +1379,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                     delete c.originChoices[name];
                 } else if (c.origins.length < 2) {
                     const hasType = type === 'racial' ? 
-                        // For racial origins, check if we already have one
                         c.origins.some(o => gameData.origins.racial[c.race]?.find(x => x.name === o)) :
-                        // For other origin types, check within that type
                         c.origins.some(o => gameData.origins[type].find(x => x.name === o));
                     if (!hasType) c.origins.push(name);
                 }
@@ -1400,7 +1419,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
             on('.feat-btn', 'click', e => {
                 const feat = e.currentTarget.dataset.feat;
                 const c = state.character;
-                const cd = gameData.classes[c.class];
+                const cd = getClassData();
                 let max = 0;
                 
                 Object.entries(cd.featChoices || {}).forEach(([l, ch]) => {
