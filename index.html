@@ -179,8 +179,8 @@
                     {name:'Enforcement',proficiency:'Intimidation',ability:'Air of Authority: Others have disadvantage to intimidate you'},
                     {name:'Aviator',proficiency:'Pilot',ability:'Crash Landing: Resistance to damage when vehicle crashes'},
                     {name:'Driver',proficiency:'Animal Handling',ability:'Speedster: Vehicles/animals you control gain +1 AC'},
-                    {name:'Enslaved',proficiency:{type:'choice',options:['Tool']},ability:'Friend to Toil: Suffer 1 less exhaustion level (min 1)'},
-                    {name:'Former Host',proficiency:'None',ability:'Naquadah Blooded: Can use Goa\'uld tech, advantage vs symbiotes'},
+                    {name:'Enslaved',proficiency:{type:'Choose one Tool proficiency',options:['Tool']},ability:'Friend to Toil: Suffer 1 less exhaustion level (min 1)'},
+                    {name:'Former Host',ability:'Naquadah Blooded: Can use Goa\'uld tech, advantage vs symbiotes'},
                     {name:'Entertainer',proficiency:'Performance',ability:'Zeitgeist: Use Cha for art/performance understanding'},
                     {name:'Freedom Fighter',proficiency:'Stealth',ability:'Last Resorts: Disadvantage on Moxie, advantage on Initiative'},
                     {name:'Healer',proficiency:'Medicine',ability:'Soothe: Team heals +Prof bonus on rest'},
@@ -212,9 +212,9 @@
             },
 
             skills: ['Acrobatics','Athletics','Culture','Deception','Engineering','Insight','Intimidation','Investigation','Medicine','Nature','Perception','Performance','Persuasion','Pilot','Science','Sleight of Hand','Stealth','Survival'],
-            weapons: ['Common Weapons','Bows','Martial Arts','Sidearms','Shotguns','Longarms','Grenades','Heavy Ordinance','Jaffa Weapons'],
-            armor: ['Light Armor','Medium Armor','Heavy Armor','Shields'],
-            tools: ['Camo Kit','Explosives','Med Kit','Research Kit','Surgical Kit','Translator','Thieves\' Tools','Tok\'ra tunneling crystals','Engineering tools']
+            weapons: ['Common Weapons','Martial Arts','Sidearms','Longarms','Shotguns','Grenades'],
+            armor: ['Light Armor','Heavy Armor'],
+            tools: ['Camo Kit','Explosives','Med Kit','Research Kit','Fabrication Kit','Translator','Engineering Kit','SCUBA','Pan-Cultural Wardrobe','Outbreak Kit']
         };
 
         // State
@@ -463,11 +463,12 @@
                     let effects = [];
                     if (origin.attribute && origin.attribute !== 'None') effects.push(origin.attribute);
                     if (origin.proficiency) {
-                        const prof = typeof origin.proficiency === 'string' ? origin.proficiency : 
+                        const prof = typeof origin.proficiency === 'string' ? 
+                                    `Proficiency: ${origin.proficiency}` : 
                                     origin.proficiency.type === 'choice' ? 
-                                    (c.originChoices[originName] ? `${c.originChoices[originName]} proficiency chosen` : `Choose ${origin.proficiency.options.join('/')}`) : 
+                                    (c.originChoices[originName] ? `Proficiency: ${c.originChoices[originName]}` : `Proficiency: Choice not yet made`) : 
                                     'Special';
-                        effects.push(`Proficiency: ${prof}`);
+                        effects.push(prof);
                     }
                     if (origin.ability) effects.push(origin.ability);
                     originsWithEffects.push(`• ${originName}: ${effects.join(', ')}`);
@@ -773,7 +774,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                                             ${isIncompatible ? '<span class="text-xs text-red-400">(Incompatible with Jaffa)</span>' : ''}
                                         </div>
                                         <div class="text-xs text-green-400 mt-1">
-                                            ${o.attribute || (typeof o.proficiency === 'string' ? o.proficiency : 'Choose')}
+                                            ${o.attribute || (typeof o.proficiency === 'string' ? o.proficiency : o.proficiency?.type === 'choice' ? 'Choose' : '')}
                                         </div>
                                         <div class="text-xs text-gray-400">${o.ability}</div>
                                     </button>
@@ -832,27 +833,90 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                     
                     if (!origin?.proficiency?.options) return '';
                     
-                    return `
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-300 mb-2">
-                                ${originName} - Choose proficiency:
-                            </label>
-                            <div class="grid grid-cols-3 gap-2">
-                                ${origin.proficiency.options.map(opt => `
-                                    <button data-origin-choice="${originName}" data-choice="${opt}" 
-                                        class="origin-choice-btn p-2 rounded text-xs transition-all ${
-                                            c.originChoices[originName] === opt ? 
-                                            'bg-green-500/20 border border-green-500 text-white' : 
-                                            'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
-                                        }">
-                                        ${opt === 'Weapon' ? 'Choose Weapon Prof.' : 
-                                          opt === 'Armor' ? 'Choose Armor Prof.' : 
-                                          opt === 'Tool' ? 'Choose Tool Prof.' : opt}
-                                    </button>
-                                `).join('')}
+                    // Different UI based on origin type
+                    if (originName === 'Military') {
+                        const militaryWeapons = ['Common Weapons','Martial Arts','Sidearms','Longarms','Shotguns'];
+                        const militaryArmor = ['Light Armor','Heavy Armor'];
+                        return `
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    Military Origin - Choose Weapon or Armor Proficiency:
+                                </label>
+                                <div class="mb-2">
+                                    <div class="text-xs text-gray-400 mb-2">Weapon Proficiencies:</div>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        ${militaryWeapons.map(weapon => `
+                                            <button data-origin-choice="${originName}" data-choice="${weapon}" 
+                                                class="origin-choice-btn p-2 rounded text-xs transition-all ${
+                                                    c.originChoices[originName] === weapon ? 
+                                                    'bg-green-500/20 border border-green-500 text-white' : 
+                                                    'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                                }">
+                                                ${weapon}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-400 mb-2">Armor Proficiencies:</div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        ${militaryArmor.map(armor => `
+                                            <button data-origin-choice="${originName}" data-choice="${armor}" 
+                                                class="origin-choice-btn p-2 rounded text-xs transition-all ${
+                                                    c.originChoices[originName] === armor ? 
+                                                    'bg-green-500/20 border border-green-500 text-white' : 
+                                                    'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                                }">
+                                                ${armor}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else if (originName === 'Enslaved') {
+                        return `
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    Enslaved Origin - Choose Tool Proficiency:
+                                </label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    ${gameData.tools.map(tool => `
+                                        <button data-origin-choice="${originName}" data-choice="${tool}" 
+                                            class="origin-choice-btn p-2 rounded text-xs transition-all ${
+                                                c.originChoices[originName] === tool ? 
+                                                'bg-green-500/20 border border-green-500 text-white' : 
+                                                'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                            }">
+                                            ${tool}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    } else if (originName === 'Tau\'ri Military') {
+                        return `
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">
+                                    Tau'ri Military - Choose Proficiency:
+                                </label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    ${origin.proficiency.options.map(opt => `
+                                        <button data-origin-choice="${originName}" data-choice="${opt}" 
+                                            class="origin-choice-btn p-2 rounded text-xs transition-all ${
+                                                c.originChoices[originName] === opt ? 
+                                                'bg-green-500/20 border border-green-500 text-white' : 
+                                                'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                            }">
+                                            ${opt}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    return '';
                 }).join('')));
             }
             
