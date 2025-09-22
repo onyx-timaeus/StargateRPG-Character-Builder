@@ -464,7 +464,8 @@
                     if (origin.attribute && origin.attribute !== 'None') effects.push(origin.attribute);
                     if (origin.proficiency) {
                         const prof = typeof origin.proficiency === 'string' ? origin.proficiency : 
-                                    origin.proficiency.type === 'choice' ? `Choose ${origin.proficiency.options.join('/')}` : 
+                                    origin.proficiency.type === 'choice' ? 
+                                    (c.originChoices[originName] ? `${c.originChoices[originName]} proficiency chosen` : `Choose ${origin.proficiency.options.join('/')}`) : 
                                     'Special';
                         effects.push(`Proficiency: ${prof}`);
                     }
@@ -472,6 +473,12 @@
                     originsWithEffects.push(`• ${originName}: ${effects.join(', ')}`);
                 }
             });
+            
+            // Collect additional proficiencies from race choices
+            let additionalProfs = [];
+            if (c.raceChoices.weapons?.length > 0) {
+                additionalProfs.push(`Weapons: ${c.raceChoices.weapons.join(', ')}`);
+            }
             
             const sheet = `STARGATE RPG CHARACTER SHEET
 ${'='.repeat(50)}
@@ -512,6 +519,10 @@ Saving Throws: ${cd ? cd.proficiencies.saves.join(', ') : 'None'}
 Armor: ${cd ? cd.proficiencies.armor.join(', ') : 'None'}
 Weapons: ${cd ? cd.proficiencies.weapons.join(', ') : 'None'}
 Tools: ${cd ? cd.proficiencies.tools.join(', ') : 'None'}
+
+${additionalProfs.length > 0 ? `ADDITIONAL PROFICIENCIES (from Race/Origin)
+----------------------------------------
+${additionalProfs.join('\n')}` : ''}
 
 CLASS ABILITIES
 ---------------
@@ -673,6 +684,23 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                 `, !c.abilityChoice));
             }
             
+            // Race weapon proficiencies (e.g. Abydonian)
+            if (rd?.proficiencies?.weapons?.type === 'choice') {
+                sections.push(section(`Choose ${rd.proficiencies.weapons.count} Weapon Proficienc${rd.proficiencies.weapons.count > 1 ? 'ies' : 'y'}`, `
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        ${gameData.weapons.map(w => {
+                            const sel = c.raceChoices.weapons?.includes(w);
+                            const max = c.raceChoices.weapons?.length >= rd.proficiencies.weapons.count;
+                            return `<button data-race-weapon="${w}" class="race-weapon-btn p-2 rounded text-xs transition-all ${
+                                sel ? 'bg-green-500/20 border border-green-500 text-white' : 
+                                max && !sel ? 'bg-gray-800 border border-gray-600 text-gray-300 opacity-50' : 
+                                'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                            }">${w}</button>`;
+                        }).join('')}
+                    </div>
+                `));
+            }
+            
             // Race proficiencies
             if (rd?.proficiencies?.skills) {
                 const skillContent = rd.proficiencies.skills.type === 'choice' ? `
@@ -787,6 +815,46 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                     </div>
                 ` : ''}
             `));
+            
+            // Origin proficiency choices (e.g. Military's weapon/armor choice)
+            const originsWithChoices = c.origins.filter(o => {
+                const bg = gameData.origins.background.find(b => b.name === o);
+                const racial = Object.values(gameData.origins.racial).flat().find(r => r.name === o);
+                const origin = bg || racial;
+                return origin?.proficiency?.type === 'choice';
+            });
+            
+            if (originsWithChoices.length > 0) {
+                sections.push(section('Origin Proficiency Choices', originsWithChoices.map(originName => {
+                    const bg = gameData.origins.background.find(b => b.name === originName);
+                    const racial = Object.values(gameData.origins.racial).flat().find(r => r.name === originName);
+                    const origin = bg || racial;
+                    
+                    if (!origin?.proficiency?.options) return '';
+                    
+                    return `
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">
+                                ${originName} - Choose proficiency:
+                            </label>
+                            <div class="grid grid-cols-3 gap-2">
+                                ${origin.proficiency.options.map(opt => `
+                                    <button data-origin-choice="${originName}" data-choice="${opt}" 
+                                        class="origin-choice-btn p-2 rounded text-xs transition-all ${
+                                            c.originChoices[originName] === opt ? 
+                                            'bg-green-500/20 border border-green-500 text-white' : 
+                                            'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                        }">
+                                        ${opt === 'Weapon' ? 'Choose Weapon Prof.' : 
+                                          opt === 'Armor' ? 'Choose Armor Prof.' : 
+                                          opt === 'Tool' ? 'Choose Tool Prof.' : opt}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('')));
+            }
             
             // Class selection
             sections.push(section('Select Class', `
@@ -1154,6 +1222,19 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                 render();
             });
             
+            on('.race-weapon-btn', 'click', e => {
+                const w = e.currentTarget.dataset.raceWeapon;
+                const weapons = state.character.raceChoices.weapons || [];
+                const max = gameData.races[state.character.race]?.subraces?.[state.character.subrace]?.proficiencies?.weapons?.count || 1;
+                
+                if (weapons.includes(w)) {
+                    state.character.raceChoices.weapons = weapons.filter(x => x !== w);
+                } else if (weapons.length < max) {
+                    state.character.raceChoices.weapons = [...weapons, w];
+                }
+                render();
+            });
+            
             on('.race-skill-btn', 'click', e => {
                 const s = e.currentTarget.dataset.raceSkill;
                 const skills = state.character.raceChoices.skills || [];
@@ -1182,6 +1263,13 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                 render();
             });
             
+            on('.origin-choice-btn', 'click', e => {
+                const originName = e.currentTarget.dataset.originChoice;
+                const choice = e.currentTarget.dataset.choice;
+                state.character.originChoices[originName] = choice;
+                render();
+            });
+            
             on('.origin-btn', 'click', e => {
                 const name = e.currentTarget.dataset.origin;
                 const type = e.currentTarget.dataset.originType;
@@ -1192,7 +1280,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                 // Check racial origin restrictions
                 if (type === 'racial') {
                     const origin = gameData.origins.racial[c.race]?.find(o => o.name === name);
-                    if (!isRacialOriginAvailable(origin)) return;
+                    if (origin && !isRacialOriginAvailable(origin)) return;
                 }
                 
                 // Save scroll positions of origin containers before render
@@ -1205,7 +1293,11 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                     c.origins = c.origins.filter(o => o !== name);
                     delete c.originChoices[name];
                 } else if (c.origins.length < 2) {
-                    const hasType = c.origins.some(o => gameData.origins[type].find(x => x.name === o));
+                    const hasType = type === 'racial' ? 
+                        // For racial origins, check if we already have one
+                        c.origins.some(o => gameData.origins.racial[c.race]?.find(x => x.name === o)) :
+                        // For other origin types, check within that type
+                        c.origins.some(o => gameData.origins[type].find(x => x.name === o));
                     if (!hasType) c.origins.push(name);
                 }
                 state.character.duplicateProficiencyChoices = [];
