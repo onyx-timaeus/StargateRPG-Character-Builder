@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stargate RPG Character Builder - Optimized</title>
+    <title>Stargate RPG Character Builder - Enhanced</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .transition-all { transition: all 0.3s ease; }
@@ -41,7 +41,7 @@
             warning: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>'
         };
 
-        // Game data with full property names for readability
+        // Game data with full property names for readability, INCLUDING FULL ABILITY DESCRIPTIONS
         const gameData = {
             fieldHackFeats: [
                 {name:'Camouflage',requirements:'Stealth',description:'Create camouflage granting advantage on Stealth in natural terrain'},
@@ -111,6 +111,318 @@
                     {name:'Response Shot',description:'Once per encounter, reaction attack when enemy attacks ally'},
                     {name:'Rush',description:'Bonus action to let ally Dash'}
                 ]
+            },
+
+            // Full class ability descriptions
+            classAbilityDescriptions: {
+                'Diplomat': {
+                    1: [
+                        {
+                            name: 'Inspire',
+                            description: 'Your mere presence inspires your comrades to pursue their mission in a myriad of clever ways. During a long rest, you may grant all team members 1d6 temporary HP with an action (the die rolled is called the Inspire die). These temporary HP last until the next long rest or until removed by damage. While a team member has these temporary hit points (called "Inspired" characters), they gain the benefits of your Inspiration feats. A character may only be Inspired by one source at a time.'
+                        },
+                        {
+                            name: 'Choose 1st Inspiration Feat',
+                            description: 'You are adept at inspiring allies in specific ways. Choose one Inspiration feat at 1st level. An Inspired character gains all of the benefits of your Inspiration feats while they have temporary HP from your Inspire ability.'
+                        }
+                    ],
+                    2: [
+                        {
+                            name: 'Pep Talk',
+                            description: 'You can give a stirring speech to your team. As an action once per mission, you can restore 1d4 Determination points to each member of your team (including yourself).'
+                        },
+                        {
+                            name: 'Word In An Ear',
+                            description: 'You can inspire a single team member within 1m as an action. Roll your Inspire HP die and grant the target Inspire HP as normal. Characters who currently have Inspire HP are immune to this ability. A character may only be targeted by your Word In An Ear once per long rest.'
+                        }
+                    ],
+                    3: [
+                        {
+                            name: 'Force of Will',
+                            description: 'You may use Inspire when you take a short or long rest. Characters already benefiting from your Inspire are immune to a second application.'
+                        },
+                        {
+                            name: 'Choose 2nd Inspiration Feat',
+                            description: 'Select your second Inspiration feat. Inspired characters gain the benefits of all your chosen Inspiration feats.'
+                        }
+                    ],
+                    4: [
+                        {
+                            name: 'Diplomatic Expertise',
+                            description: 'Choose Culture, Insight, or Persuasion. Your Proficiency bonus is doubled for any ability check you make that uses the chosen proficiency.'
+                        },
+                        {
+                            name: 'Ability Score Improvement',
+                            description: 'You can increase your Wisdom or Charisma by +2, or you can increase two ability scores of your choice by +1. As normal, you can\'t increase an ability score above 20 using this feature.'
+                        }
+                    ],
+                    5: [
+                        {
+                            name: 'Strong Personality',
+                            description: 'Your Inspire die increases from 1d6 to 1d8.'
+                        },
+                        {
+                            name: 'Choose 3rd Inspiration Feat',
+                            description: 'Select your third Inspiration feat. Inspired characters gain the benefits of all your chosen Inspiration feats.'
+                        }
+                    ]
+                },
+                'Engineer': {
+                    1: [
+                        {
+                            name: 'Jury Rig',
+                            description: 'You are an expert at field repairs, even when you have to get creative. When you use an engineering kit to repair a machine you heal 2d8 points of damage instead of 2d6. In addition, you may repair an adjacent machine as an action rather than only during a short rest.'
+                        },
+                        {
+                            name: 'Choose 1st Modification Feat',
+                            description: 'You\'ve made special modifications that enhance the effectiveness of you and your team\'s gear. Choose one Modification feat at 1st level.'
+                        }
+                    ],
+                    2: [
+                        {
+                            name: 'Hold Together',
+                            description: 'When you benefit from cover, you gain resistance to the damage of attacks hindered by that cover.'
+                        },
+                        {
+                            name: 'Whack-It',
+                            description: 'You\'ve learned the time-honored technique of a well placed thump. As a bonus action you can give one adjacent machine +1d6 temporary hit points. If this brings the machine\'s HP to above half its normal HP, it begins to function immediately. You may only maintain these temporary HP on one machine at a time.'
+                        }
+                    ],
+                    3: [
+                        {
+                            name: 'Tune-Up',
+                            description: 'You add your Intelligence modifier to the amount repaired whenever you repair a machine or grant a machine temporary HP.'
+                        },
+                        {
+                            name: 'Choose 2nd Modification Feat',
+                            description: 'Select your second Modification feat to enhance your team\'s equipment.'
+                        }
+                    ],
+                    4: [
+                        {
+                            name: 'Broad Spectrum Scanners',
+                            description: 'You can use Intelligence instead of Wisdom when making Perception Checks.'
+                        },
+                        {
+                            name: 'Ability Score Improvement',
+                            description: 'You can increase your Dexterity or Intelligence by +2, or you can increase two ability scores of your choice by +1. As normal, you can\'t increase an ability score above 20 using this feature.'
+                        }
+                    ],
+                    5: [
+                        {
+                            name: 'Xeno-Tech Specialist',
+                            description: 'You have gained a broad understanding of various technologies alien to your home world. When performing an episode R&D encounter, you may use this out-of-the-box thinking to reduce the time required by one stage (minutes requires rounds, hours requires minutes, and so on).'
+                        },
+                        {
+                            name: 'Choose 3rd Modification Feat',
+                            description: 'Select your third Modification feat to enhance your team\'s equipment.'
+                        }
+                    ]
+                },
+                'Medic': {
+                    1: [
+                        {
+                            name: 'First Aid',
+                            description: 'Your extensive training in field medicine allows you to rapidly provide aid to a wounded team member. When you use a med kit to heal, you add your Proficiency bonus to the healed amount. In addition, you may use a med kit to heal a wounded team member as an action (rather than during a short rest). Med kits can only heal the target again until after a short rest.'
+                        },
+                        {
+                            name: 'Choose 1st Procedure Feat',
+                            description: 'You\'ve learned a few advanced medical and scientific procedures you can employ in the field. Choose one Procedure feat at 1st level.'
+                        }
+                    ],
+                    2: [
+                        {
+                            name: 'Triage',
+                            description: 'You can observe a character\'s current physical condition as a bonus action with a DC 20 Medicine check. If successful, you learn the character\'s current and total HP as well as their total hit dice. You suffer disadvantage against a target if you are unfamiliar with its biology.'
+                        },
+                        {
+                            name: 'Unnoticed Field Medic',
+                            description: 'When you heal a team member using first aid, attacks against you suffer disadvantage until your next turn.'
+                        }
+                    ],
+                    3: [
+                        {
+                            name: 'Man Down',
+                            description: 'While you are conscious and within 1m of a dying team member, they require one fewer death saves to stabilize.'
+                        },
+                        {
+                            name: 'Choose 2nd Procedure Feat',
+                            description: 'Select your second Procedure feat to expand your medical expertise.'
+                        }
+                    ],
+                    4: [
+                        {
+                            name: 'Physician Heal Thyself',
+                            description: 'You may use a med kit on yourself as a bonus action.'
+                        },
+                        {
+                            name: 'Ability Score Improvement',
+                            description: 'You can increase your Intelligence or Wisdom by +2, or you can increase two ability scores of your choice by +1. As normal, you can\'t increase an ability score above 20 using this feature.'
+                        }
+                    ],
+                    5: [
+                        {
+                            name: 'First Response',
+                            description: 'You may add your Wisdom modifier to the damage you heal with a med kit. In addition, you may use a med kit to heal a scuffed team member as an action (rather than during a short rest).'
+                        },
+                        {
+                            name: 'Choose 3rd Procedure Feat',
+                            description: 'Select your third Procedure feat to master advanced medical techniques.'
+                        }
+                    ]
+                },
+                'Scientist': {
+                    1: [
+                        {
+                            name: 'Eureka',
+                            description: 'Whenever you fail an Intelligence or Wisdom check during a mission, you gain one Eureka point. You may have a maximum number of Eureka points equal to your Intelligence or Wisdom modifier (whichever is higher). All unspent Eureka points are lost at the end of each mission. Whenever you make an Intelligence or Wisdom check, you may spend one Eureka point to gain advantage.'
+                        },
+                        {
+                            name: 'Choose 1st Discovery Feat',
+                            description: 'Your careful study of scientific principles and your chosen field of study allow you to make insights few others would consider. Choose one Discovery feat at 1st level.'
+                        }
+                    ],
+                    2: [
+                        {
+                            name: 'Apt Analogy',
+                            description: 'You can employ an easy to understand analogy to help others work through complex or esoteric problems. Once per short rest you may grant a friendly character a +TD bonus on an Intelligence or Wisdom skill check.'
+                        },
+                        {
+                            name: 'Great Mind',
+                            description: 'You are difficult to deceive or confuse. You are immune to the Charmed condition, and you gain advantage on any Insight checks to discern lies.'
+                        }
+                    ],
+                    3: [
+                        {
+                            name: 'Cross-discipline Studies',
+                            description: 'You add half your Proficiency bonus, rounded down, to any Intelligence, Wisdom, or Charisma skill check that doesn\'t already include your Proficiency bonus.'
+                        },
+                        {
+                            name: 'Choose 2nd Discovery Feat',
+                            description: 'Select your second Discovery feat to expand your scientific expertise.'
+                        }
+                    ],
+                    4: [
+                        {
+                            name: 'Resilient Mind',
+                            description: 'When you suffer Intelligence, Wisdom, or Charisma damage, reduce the amount of damage suffered by 1 point (minimum 1).'
+                        },
+                        {
+                            name: 'Ability Score Improvement',
+                            description: 'You can increase your Intelligence or Wisdom by +2, or you can increase two ability scores of your choice by +1. As normal, you can\'t increase an ability score above 20 using this feature.'
+                        }
+                    ],
+                    5: [
+                        {
+                            name: 'Casual Genius',
+                            description: 'You begin each mission with a number of Eureka points equal to half your Proficiency bonus (rounding down).'
+                        },
+                        {
+                            name: 'For Science!',
+                            description: 'You may spend a Eureka point to gain advantage on Charisma checks in addition to Intelligence and Wisdom checks.'
+                        },
+                        {
+                            name: 'Choose 3rd Discovery Feat',
+                            description: 'Select your third Discovery feat to master your scientific field.'
+                        }
+                    ]
+                },
+                'Scout': {
+                    1: [
+                        {
+                            name: 'Survivalist',
+                            description: 'You gain resistance to environmental damage (extreme heat, cold, radiation, etc.).'
+                        },
+                        {
+                            name: 'Choose 1st Field Hack Feat',
+                            description: 'Your time in the field has taught you tricks for surviving in hostile environments. Choose one Field Hack feat at 1st level.'
+                        }
+                    ],
+                    2: [
+                        {
+                            name: 'Vanguard',
+                            description: 'When you deal damage to a target within 5m of you, add +1d6 damage.'
+                        },
+                        {
+                            name: 'Trap Rigging',
+                            description: 'You may set traps as an action. The trap deals damage equal to the weapon or explosive used to create it.'
+                        }
+                    ],
+                    3: [
+                        {
+                            name: 'Uncanny Dodge',
+                            description: 'When an attacker that you can see hits you with an attack, you can use your reaction to gain resistance to that attack\'s damage.'
+                        },
+                        {
+                            name: 'Scout\'s Cunning',
+                            description: 'You may take a bonus action to Dash, Disengage, or Hide on your turn.'
+                        }
+                    ],
+                    4: [
+                        {
+                            name: 'Ability Score Improvement',
+                            description: 'You can increase your Dexterity or Constitution by +2, or you can increase two ability scores of your choice by +1. As normal, you can\'t increase an ability score above 20 using this feature.'
+                        },
+                        {
+                            name: 'Choose 2nd Field Hack Feat',
+                            description: 'Select your second Field Hack feat to expand your wilderness expertise.'
+                        }
+                    ],
+                    5: [
+                        {
+                            name: 'Evasion',
+                            description: 'When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail.'
+                        }
+                    ]
+                },
+                'Soldier': {
+                    1: [
+                        {
+                            name: 'Tactical Flexibility',
+                            description: 'You\'ve learned to direct your team in a variety of tactics. As an action you may activate a Tactic feat that you don\'t know. This tactic lasts for a number of rounds equal to your Charisma modifier (minimum 1). When the duration has run out, you may choose a tactic you know (if any) to re-activate automatically. Once you use this ability, you cannot use it again until you\'ve taken a long rest.'
+                        },
+                        {
+                            name: 'Choose 1st Tactic Feat',
+                            description: 'You\'ve trained extensively with a specific tactic, providing advantages to your team. Your team may benefit from one tactic at a time, and you may change your current tactic to another tactic you know with an action on your turn. Choose one Tactic feat at 1st level.'
+                        }
+                    ],
+                    2: [
+                        {
+                            name: 'Surge',
+                            description: 'You can take an additional action on your turn (even an attack) as a bonus action. You must complete a short or long rest before you can use this ability again.'
+                        },
+                        {
+                            name: 'Rally',
+                            description: 'If you are wounded when initiative is rolled (at the start of an action encounter), you may immediately heal TD Hit Points. Once used, you may not activate this ability again until you take a long rest.'
+                        }
+                    ],
+                    3: [
+                        {
+                            name: 'Martial Training',
+                            description: 'You\'ve trained to deal maximum damage with whatever melee weapon you wield, even improvised weapons. Your minimum damage die for melee weapons or martial arts is 1d8.'
+                        },
+                        {
+                            name: 'Improved Critical',
+                            description: 'Choose a weapon type you are proficient with (such as longarm, sidearm, or common). When using this weapon type you score a critical hit on a 19 or 20 on the die.'
+                        }
+                    ],
+                    4: [
+                        {
+                            name: 'Ability Score Improvement',
+                            description: 'You can increase your Strength or Constitution by +2, or you can increase two ability scores of your choice by +1. As normal, you can\'t increase an ability score above 20 using this feature.'
+                        },
+                        {
+                            name: 'Choose 2nd Tactic Feat',
+                            description: 'Select your second Tactic feat to expand your tactical options in combat.'
+                        }
+                    ],
+                    5: [
+                        {
+                            name: 'Tactical Superiority',
+                            description: 'You may have two tactics in effect at the same time.'
+                        }
+                    ]
+                }
             },
 
             races: {
@@ -455,15 +767,13 @@
             const cd = getClassData();
             const fs = getFinalAbilityScores();
             
-            // Collect all class abilities with descriptions
+            // Collect all class abilities with FULL descriptions
             let classAbilities = [];
-            if (cd) {
-                Object.entries(cd.abilities).forEach(([level, abilities]) => {
+            if (cd && gameData.classAbilityDescriptions[c.class]) {
+                Object.entries(gameData.classAbilityDescriptions[c.class]).forEach(([level, abilities]) => {
                     if (parseInt(level) <= c.level) {
                         abilities.forEach(ability => {
-                            if (!ability.includes('Choose') && !ability.includes('feat')) {
-                                classAbilities.push(`• Level ${level}: ${ability}`);
-                            }
+                            classAbilities.push(`• Level ${level} - ${ability.name}: ${ability.description}`);
                         });
                     }
                 });
@@ -565,7 +875,7 @@ ${additionalProfs.join('\n')}` : ''}
 
 CLASS ABILITIES
 ---------------
-${classAbilities.length > 0 ? classAbilities.join('\n') : '• None'}
+${classAbilities.length > 0 ? classAbilities.join('\n\n') : '• None'}
 
 CLASS FEATS SELECTED
 --------------------
@@ -1036,8 +1346,8 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                 </div>
             `));
             
-            // Class abilities
-            if (cd && c.level > 0) {
+            // Class abilities - ENHANCED WITH FULL DESCRIPTIONS
+            if (cd && c.level > 0 && gameData.classAbilityDescriptions[c.class]) {
                 sections.push(section('', `
                     <div id="toggle-abilities" class="flex items-center justify-between cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-300 flex items-center gap-2">
@@ -1048,25 +1358,18 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                     
                     ${state.showClassAbilities ? `
                         <div class="mt-4 space-y-3">
-                            ${Object.entries(cd.abilities)
+                            ${Object.entries(gameData.classAbilityDescriptions[c.class])
                                 .filter(([level]) => parseInt(level) <= c.level)
                                 .map(([level, abilities]) => `
-                                    <div class="bg-gray-800 rounded-lg p-3">
-                                        <div class="text-sm font-semibold text-purple-400 mb-2">Level ${level}</div>
-                                        <div class="space-y-2">
-                                            ${abilities.filter(a => !a.includes('Choose') && !a.includes('Ability Score')).map(ability => {
-                                                const colonIndex = ability.indexOf('(');
-                                                const hasDesc = colonIndex !== -1;
-                                                const name = hasDesc ? ability.substring(0, colonIndex).trim() : ability;
-                                                const desc = hasDesc ? ability.substring(colonIndex).trim() : '';
-                                                
-                                                return `
-                                                    <div class="pl-2 border-l-2 border-gray-700">
-                                                        <div class="text-sm font-medium text-white">${name}</div>
-                                                        ${desc ? `<div class="text-xs text-gray-400 mt-1">${desc}</div>` : ''}
-                                                    </div>
-                                                `;
-                                            }).join('')}
+                                    <div class="bg-gray-800 rounded-lg p-4">
+                                        <div class="text-sm font-semibold text-purple-400 mb-3">Level ${level}</div>
+                                        <div class="space-y-3">
+                                            ${abilities.map(ability => `
+                                                <div class="pl-3 border-l-2 border-gray-700">
+                                                    <div class="text-sm font-medium text-white mb-1">${ability.name}</div>
+                                                    <div class="text-xs text-gray-400">${ability.description}</div>
+                                                </div>
+                                            `).join('')}
                                         </div>
                                     </div>
                                 `).join('')}
