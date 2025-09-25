@@ -203,7 +203,15 @@
                     {name:'Student',proficiency:'Perception',ability:'Quick Study: 1/mission use Int save instead of another'}
                 ],
                 racial: {
-                    'Human': [{name:'Tau\'ri Military',attribute:'None',proficiency:{type:'choice',options:['Martial Arts','Longarms','Heavy Armor'],description:'Choose one proficiency'},ability:'Basic Training: Chosen proficiency from military service',restrictedTo:['Standard Human (Tau\'ri)']}],
+                    'Human': [{
+                        name:'Tau\'ri Military',
+                        attribute:'choice',
+                        attributeOptions:['Strength +1','Constitution +1'],
+                        ability:'Never Surrender: You gain +1 to attack rolls for each level of exhaustion you have',
+                        restrictedTo:['Standard Human (Tau\'ri)'],
+                        isHomebrew:true,
+                        description:'You\'re an elite soldier from Earth\'s most demanding military programs. Rangers, Special Forces, Marines - you represent the pinnacle of Tau\'ri military excellence. Your training has conditioned you to push harder when others falter. The harsher the conditions become, the more focused and dangerous you are.'
+                    }],
                     'Jaffa': [{name:'Jaffa Renegade',attribute:'Wisdom +1',ability:'Rebel: Advantage on saves vs Goa\'uld and Jaffa'},{name:'Student of Bra\'tac',attribute:'Dexterity +1',ability:'Ma\'tok Mastery: Ma\'tok gains finesse property'}],
                     'Aturen': [{name:'Aturen Spiritualist',attribute:'None',ability:'Ritual of Life: DC 20 Culture check to resurrect',restrictedTo:['Noxian Pacifist']}],
                     'Tok\'ra': [{name:'Tok\'ra Spy',attribute:'Charisma +1',ability:'Passing: Advantage on Deception as Human/Goa\'uld/Jaffa'}],
@@ -363,8 +371,17 @@
             c.origins.forEach(oName => {
                 const orig = findOrigin(oName);
                 if (orig?.attribute && orig.attribute !== 'None') {
-                    const [attr, val] = orig.attribute.split(' +');
-                    if (attr.toLowerCase() === ability) origin += parseInt(val);
+                    if (orig.attribute === 'choice') {
+                        // Handle choice-based attributes (like Tau'ri Military)
+                        const chosen = c.originChoices[oName];
+                        if (chosen) {
+                            const [attr, val] = chosen.split(' +');
+                            if (attr.toLowerCase() === ability) origin += parseInt(val);
+                        }
+                    } else {
+                        const [attr, val] = orig.attribute.split(' +');
+                        if (attr.toLowerCase() === ability) origin += parseInt(val);
+                    }
                 }
             });
             
@@ -476,7 +493,13 @@
                 
                 if (origin) {
                     let effects = [];
-                    if (origin.attribute && origin.attribute !== 'None') effects.push(origin.attribute);
+                    if (origin.attribute && origin.attribute !== 'None') {
+                        if (origin.attribute === 'choice' && c.originChoices[originName]) {
+                            effects.push(c.originChoices[originName]);
+                        } else if (origin.attribute !== 'choice') {
+                            effects.push(origin.attribute);
+                        }
+                    }
                     if (origin.proficiency) {
                         const prof = typeof origin.proficiency === 'string' ? 
                                     `Proficiency: ${origin.proficiency}` : 
@@ -486,7 +509,7 @@
                         effects.push(prof);
                     }
                     if (origin.ability) effects.push(origin.ability);
-                    originsWithEffects.push(`• ${originName}: ${effects.join(', ')}`);
+                    originsWithEffects.push(`• ${originName}${origin.isHomebrew ? ' (Homebrew)' : ''}: ${effects.join(', ')}`);
                 }
             });
             
@@ -829,10 +852,13 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                                     }">
                                         <div class="font-semibold text-sm text-white">
                                             ${o.name}
+                                            ${o.isHomebrew ? '<span class="text-yellow-300 text-xs">(Homebrew version)</span>' : ''}
                                             ${notAvailable ? `<span class="text-xs text-red-400">(Only for ${o.restrictedTo.join(', ')})</span>` : ''}
                                         </div>
+                                        ${o.description ? `<div class="text-xs text-gray-300 italic mt-1 mb-2">${o.description}</div>` : ''}
                                         <div class="text-xs text-green-400 mt-1">
-                                            ${o.attribute !== 'None' && o.attribute ? o.attribute : ''}
+                                            ${o.attribute !== 'None' && o.attribute !== 'choice' && o.attribute ? o.attribute : ''}
+                                            ${o.attribute === 'choice' && o.attributeOptions ? `Choose: ${o.attributeOptions.join(' OR ')}` : ''}
                                             ${proficiencyDisplay ? (o.attribute && o.attribute !== 'None' ? ' | ' : '') + proficiencyDisplay : ''}
                                         </div>
                                         <div class="text-xs text-gray-400">${o.ability}</div>
@@ -844,94 +870,33 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                 ` : ''}
             `));
             
-            // Origin proficiency choices (e.g. Military's weapon/armor choice)
+            // Origin proficiency choices and attribute choices
             const originsWithChoices = c.origins.filter(o => {
                 const origin = findOrigin(o);
-                return origin?.proficiency?.type === 'choice';
+                return origin?.proficiency?.type === 'choice' || origin?.attribute === 'choice';
             });
             
             if (originsWithChoices.length > 0) {
-                sections.push(section('Origin Proficiency Choices', originsWithChoices.map(originName => {
+                sections.push(section('Origin Choices', originsWithChoices.map(originName => {
                     const origin = findOrigin(originName);
+                    let content = '';
                     
-                    if (!origin?.proficiency?.options) return '';
-                    
-                    // Different UI based on origin type
-                    if (originName === 'Military') {
-                        const militaryWeapons = ['Common Weapons','Martial Arts','Sidearms','Longarms','Shotguns'];
-                        const militaryArmor = ['Light Armor','Heavy Armor'];
-                        return `
+                    // Handle attribute choice (Tau'ri Military)
+                    if (origin?.attribute === 'choice' && origin?.attributeOptions) {
+                        content += `
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    Military Origin - Choose one weapon or armor proficiency:
+                                    ${originName} - Choose one attribute:
                                 </label>
-                                <div class="mb-2">
-                                    <div class="text-xs text-gray-400 mb-2">Weapon Proficiencies:</div>
-                                    <div class="grid grid-cols-3 gap-2">
-                                        ${militaryWeapons.map(weapon => `
-                                            <button data-origin-choice="${originName}" data-choice="${weapon}" 
-                                                class="origin-choice-btn p-2 rounded text-xs transition-all ${
-                                                    c.originChoices[originName] === weapon ? 
-                                                    'bg-green-500/20 border border-green-500 text-white' : 
-                                                    'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
-                                                }">
-                                                ${weapon}
-                                            </button>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="text-xs text-gray-400 mb-2">Armor Proficiencies:</div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        ${militaryArmor.map(armor => `
-                                            <button data-origin-choice="${originName}" data-choice="${armor}" 
-                                                class="origin-choice-btn p-2 rounded text-xs transition-all ${
-                                                    c.originChoices[originName] === armor ? 
-                                                    'bg-green-500/20 border border-green-500 text-white' : 
-                                                    'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
-                                                }">
-                                                ${armor}
-                                            </button>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    } else if (originName === 'Enslaved') {
-                        return `
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    Enslaved Origin - Choose one tool proficiency:
-                                </label>
-                                <div class="grid grid-cols-3 gap-2">
-                                    ${gameData.tools.map(tool => `
-                                        <button data-origin-choice="${originName}" data-choice="${tool}" 
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${origin.attributeOptions.map(attr => `
+                                        <button data-origin-choice="${originName}" data-choice="${attr}" 
                                             class="origin-choice-btn p-2 rounded text-xs transition-all ${
-                                                c.originChoices[originName] === tool ? 
+                                                c.originChoices[originName] === attr ? 
                                                 'bg-green-500/20 border border-green-500 text-white' : 
                                                 'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
                                             }">
-                                            ${tool}
-                                        </button>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    } else if (originName === 'Tau\'ri Military') {
-                        return `
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    Tau'ri Military - Choose one proficiency:
-                                </label>
-                                <div class="grid grid-cols-3 gap-2">
-                                    ${origin.proficiency.options.map(opt => `
-                                        <button data-origin-choice="${originName}" data-choice="${opt}" 
-                                            class="origin-choice-btn p-2 rounded text-xs transition-all ${
-                                                c.originChoices[originName] === opt ? 
-                                                'bg-green-500/20 border border-green-500 text-white' : 
-                                                'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
-                                            }">
-                                            ${opt}
+                                            ${attr}
                                         </button>
                                     `).join('')}
                                 </div>
@@ -939,15 +904,80 @@ ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
                         `;
                     }
                     
-                    return '';
+                    // Handle proficiency choices
+                    if (origin?.proficiency?.type === 'choice' && origin?.proficiency?.options) {
+                        if (originName === 'Military') {
+                            const militaryWeapons = ['Common Weapons','Martial Arts','Sidearms','Longarms','Shotguns'];
+                            const militaryArmor = ['Light Armor','Heavy Armor'];
+                            content += `
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                                        Military Origin - Choose one weapon or armor proficiency:
+                                    </label>
+                                    <div class="mb-2">
+                                        <div class="text-xs text-gray-400 mb-2">Weapon Proficiencies:</div>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            ${militaryWeapons.map(weapon => `
+                                                <button data-origin-choice="${originName}" data-choice="${weapon}" 
+                                                    class="origin-choice-btn p-2 rounded text-xs transition-all ${
+                                                        c.originChoices[originName] === weapon ? 
+                                                        'bg-green-500/20 border border-green-500 text-white' : 
+                                                        'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                                    }">
+                                                    ${weapon}
+                                                </button>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-gray-400 mb-2">Armor Proficiencies:</div>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            ${militaryArmor.map(armor => `
+                                                <button data-origin-choice="${originName}" data-choice="${armor}" 
+                                                    class="origin-choice-btn p-2 rounded text-xs transition-all ${
+                                                        c.originChoices[originName] === armor ? 
+                                                        'bg-green-500/20 border border-green-500 text-white' : 
+                                                        'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                                    }">
+                                                    ${armor}
+                                                </button>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        } else if (originName === 'Enslaved') {
+                            content += `
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">
+                                        Enslaved Origin - Choose one tool proficiency:
+                                    </label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        ${gameData.tools.map(tool => `
+                                            <button data-origin-choice="${originName}" data-choice="${tool}" 
+                                                class="origin-choice-btn p-2 rounded text-xs transition-all ${
+                                                    c.originChoices[originName] === tool ? 
+                                                    'bg-green-500/20 border border-green-500 text-white' : 
+                                                    'bg-gray-800 border border-gray-600 text-gray-300 hover:border-gray-500'
+                                                }">
+                                                ${tool}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    return content;
                 }).join('')));
             }
             
-            // Class selection
+            // Class selection - Fixed colors
             sections.push(section('Select Class', `
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     ${Object.entries(gameData.classes).map(([name, data]) => `
-                        <button data-class="${name}" class="class-btn ${renderButton(null, c.class === name, false, 'border-purple-500 bg-purple-500/20')}">
+                        <button data-class="${name}" class="class-btn ${renderButton(null, c.class === name)}">
                             <div class="font-semibold">${name}</div>
                             <div class="text-xs mt-1 opacity-75">HD: d${data.hitDie}, DP: +${data.determinationBonus}</div>
                         </button>
