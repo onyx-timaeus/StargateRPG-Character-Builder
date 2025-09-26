@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -42,8 +41,8 @@
             warning: '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>'
         };
 
-        // Game data with full property names for readability, INCLUDING FULL ABILITY DESCRIPTIONS
-        const gameData = {
+        // GAME DATA PLACEHOLDER - REPLACE THIS WITH ACTUAL DATA
+const gameData = {
             // Field Hack feats with requirements - ALL require Survivalist ability (Scout class)
             fieldHackFeats:[
                 {name:'Camouflage',requirements:'Stealth',baseRequirement:'Survivalist',description:'Using elements of the natural environment, you grant your team advantage on Stealth checks after a short or long rest in an environment.'},
@@ -682,54 +681,6 @@
             return Array.from(skills);
         };
 
-        // Enhanced feat requirement checking
-        const canSelectFeat = (feat, featType) => {
-            const c = state.character;
-            const finalSkills = getFinalSkillProficiencies();
-            const cd = getClassData();
-            const finalScores = getFinalAbilityScores();
-            
-            // Check base class ability requirements
-            if (feat.baseRequirement) {
-                if (feat.baseRequirement === 'Inspire' && c.class !== 'Diplomat') return false;
-                if (feat.baseRequirement === 'Jury Rig' && c.class !== 'Engineer') return false;
-                if (feat.baseRequirement === 'First Aid' && c.class !== 'Medic') return false;
-                if (feat.baseRequirement === 'Eureka' && c.class !== 'Scientist') return false;
-                if (feat.baseRequirement === 'Survivalist' && c.class !== 'Scout') return false;
-                if (feat.baseRequirement === 'Tactical Flexibility' && c.class !== 'Soldier') return false;
-            }
-            
-            // Legacy check for feat types without explicit base requirements
-            if (!feat.baseRequirement) {
-                if (featType === 'inspiration' && c.class !== 'Diplomat') return false;
-                if (featType === 'modification' && c.class !== 'Engineer') return false;
-                if (featType === 'procedure' && c.class !== 'Medic') return false;
-                if (featType === 'discovery' && c.class !== 'Scientist') return false;
-                if (featType === 'fieldHack' && c.class !== 'Scout') return false;
-                if (featType === 'tactic' && c.class !== 'Soldier') return false;
-            }
-            
-            // Check additional requirements
-            if (feat.requirements && feat.requirements !== '') {
-                // Check for ability score requirements (e.g., "Constitution 13+")
-                if (feat.requirements.includes('13+')) {
-                    const ability = feat.requirements.split(' ')[0].toLowerCase();
-                    if (finalScores[ability] < 13) return false;
-                }
-                // Check if it's a skill requirement
-                else if (gameData.skills.includes(feat.requirements)) {
-                    return finalSkills.includes(feat.requirements);
-                }
-                // Check if it's a tool requirement
-                else if (gameData.tools.includes(feat.requirements)) {
-                    // Check class tool proficiencies
-                    return cd?.proficiencies?.tools?.includes(feat.requirements) || false;
-                }
-            }
-            
-            return true;
-        };
-
         const getAbilityBonuses = ability => {
             let racial = 0, origin = 0, asi = 0;
             const c = state.character;
@@ -743,7 +694,6 @@
                 const orig = findOrigin(oName);
                 if (orig?.attribute && orig.attribute !== 'None') {
                     if (orig.attribute === 'choice') {
-                        // Handle choice-based attributes (like Tau'ri Military)
                         const chosen = c.originChoices[oName];
                         if (chosen) {
                             const [attr, val] = chosen.split(' +');
@@ -826,7 +776,6 @@
             const cd = getClassData();
             const fs = getFinalAbilityScores();
             
-            // Collect all class abilities with FULL descriptions
             let classAbilities = [];
             if (cd && gameData.classAbilityDescriptions[c.class]) {
                 Object.entries(gameData.classAbilityDescriptions[c.class]).forEach(([level, abilities]) => {
@@ -838,7 +787,6 @@
                 });
             }
             
-            // Collect selected class feats with descriptions
             let selectedFeats = [];
             c.classFeats.forEach(featName => {
                 let feat = null;
@@ -855,7 +803,6 @@
                 }
             });
             
-            // Collect origins with effects
             let originsWithEffects = [];
             c.origins.forEach(originName => {
                 const origin = findOrigin(originName);
@@ -882,13 +829,11 @@
                 }
             });
             
-            // Collect additional proficiencies from race choices
             let additionalProfs = [];
             if (c.raceChoices.weapons?.length > 0) {
                 additionalProfs.push(`Weapons: ${c.raceChoices.weapons.join(', ')}`);
             }
             
-            // Add Tau'ri Military (Official) proficiency choice if selected
             if (c.origins.includes('Tau\'ri Military (Official)') && c.originChoices['Tau\'ri Military (Official)']) {
                 additionalProfs.push(`Basic Training: ${c.originChoices['Tau\'ri Military (Official)']}`);
             }
@@ -933,7 +878,7 @@ Armor: ${cd ? cd.proficiencies.armor.join(', ') : 'None'}
 Weapons: ${cd ? cd.proficiencies.weapons.join(', ') : 'None'}
 Tools: ${cd ? cd.proficiencies.tools.join(', ') : 'None'}
 
-## ${additionalProfs.length > 0 ? `ADDITIONAL PROFICIENCIES (from Race/Origin)
+${additionalProfs.length > 0 ? `## ADDITIONAL PROFICIENCIES (from Race/Origin)
 
 ${additionalProfs.join('\n')}` : ''}
 
@@ -953,14 +898,14 @@ ${originsWithEffects.join('\n')}
 
 ${rd ? rd.abilities.map(a => `• ${a}`).join('\n') : '• None'}
 
-## ${c.level >= 4 && Object.keys(c.abilityScoreImprovements).length > 0 ? `ABILITY SCORE IMPROVEMENTS (Level 4)
+${c.level >= 4 && Object.keys(c.abilityScoreImprovements).length > 0 ? `## ABILITY SCORE IMPROVEMENTS (Level 4)
 
 ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
     if (value.endsWith('_2')) return `• ${value.replace('_2', '')} +2`;
     return `• ${value} +1`;
 }).join('\n')}` : ''}
 
-## ${c.level === 5 && state.attackSpecialistChoice ? `BONUS FEAT (Level 5)
+${c.level === 5 && state.attackSpecialistChoice ? `## BONUS FEAT (Level 5)
 
 • Attack Specialist (${state.attackSpecialistChoice}): +1 to attack and damage rolls` : ''}`;
 
@@ -1090,7 +1035,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 }).join('')));
             }
             
-            // Ability choice (keep visible after selection)
+            // Ability choice
             if (rd?.abilityIncrease?.type === 'choice') {
                 sections.push(section('Choose ONE Ability Score Increase (+' + rd.abilityIncrease.value + ')', `
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -1106,7 +1051,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 `, !c.abilityChoice));
             }
             
-            // Race weapon proficiencies (e.g. Abydonian)
+            // Race weapon proficiencies
             if (rd?.proficiencies?.weapons?.type === 'choice') {
                 sections.push(section(`Choose ${rd.proficiencies.weapons.count} Weapon Proficienc${rd.proficiencies.weapons.count > 1 ? 'ies' : 'y'}`, `
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -1171,7 +1116,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 sections.push(section(rd.proficiencies.skills.type === 'choice' ? `Choose ${rd.proficiencies.skills.count} Skill Proficienc${rd.proficiencies.skills.count > 1 ? 'ies' : 'y'}` : 'Skill Proficiencies', skillContent));
             }
             
-            // Origins with improved display including descriptions
+            // Origins with descriptions
             sections.push(section('Select Origins (Choose 2 from different categories)', `
                 ${['biome', 'background'].map(type => `
                     <div class="mb-4">
@@ -1245,7 +1190,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 ` : ''}
             `));
             
-            // Origin proficiency choices and attribute choices
+            // Origin proficiency choices
             const originsWithChoices = c.origins.filter(o => {
                 const origin = findOrigin(o);
                 return origin?.proficiency?.type === 'choice' || origin?.attribute === 'choice' || o === 'Tau\'ri Military (Official)';
@@ -1256,7 +1201,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                     const origin = findOrigin(originName);
                     let content = '';
                     
-                    // Handle Tau'ri Military (Official) basic training choice
+                    // Handle special origins that need choices
                     if (originName === 'Tau\'ri Military (Official)') {
                         const basicTrainingOptions = ['Martial Arts', 'Longarms', 'Heavy Armor'];
                         content += `
@@ -1280,7 +1225,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                         `;
                     }
                     
-                    // Handle attribute choice (Tau'ri Military Homebrew)
+                    // Handle attribute choice
                     if (origin?.attribute === 'choice' && origin?.attributeOptions) {
                         content += `
                             <div class="mb-4">
@@ -1303,7 +1248,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                         `;
                     }
                     
-                    // Handle proficiency choices
+                    // Handle other proficiency choices
                     if (origin?.proficiency?.type === 'choice' && origin?.proficiency?.options) {
                         if (originName === 'Military') {
                             const militaryWeapons = ['Common Weapons','Martial Arts','Sidearms','Longarms','Shotguns'];
@@ -1434,7 +1379,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 </div>
             `));
             
-            // Class abilities - ENHANCED WITH FULL DESCRIPTIONS
+            // Class abilities
             if (cd && c.level > 0 && gameData.classAbilityDescriptions[c.class]) {
                 sections.push(section('', `
                     <div id="toggle-abilities" class="flex items-center justify-between cursor-pointer">
@@ -1466,7 +1411,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 `));
             }
             
-            // Class feats - Enhanced with proper requirement checking
+            // Class feats - NO REQUIREMENTS
             if (cd?.featChoices) {
                 let req = 0, type = null;
                 Object.entries(cd.featChoices).forEach(([l, ch]) => {
@@ -1491,33 +1436,16 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                                 ${feats.map(feat => {
                                     const sel = c.classFeats.includes(feat.name);
                                     const can = c.classFeats.length < req && !sel;
-                                    const meets = canSelectFeat(feat, type);
-                                    
-                                    // Build requirement display text
-                                    let requirementText = '';
-                                    if (feat.baseRequirement) {
-                                        requirementText = feat.baseRequirement;
-                                        if (feat.requirements && feat.requirements !== '') {
-                                            requirementText += `, ${feat.requirements}`;
-                                        }
-                                    } else if (feat.requirements && feat.requirements !== '') {
-                                        requirementText = feat.requirements;
-                                    }
-                                    
                                     return `
-                                        <button data-feat="${feat.name}" data-feat-type="${type}" class="feat-btn w-full text-left p-3 rounded border transition-all ${
+                                        <button data-feat="${feat.name}" class="feat-btn w-full text-left p-3 rounded border transition-all ${
                                             sel ? 'border-purple-500 bg-purple-500/20' :
-                                            !meets ? 'border-red-700 bg-red-900/20 opacity-60 cursor-not-allowed' :
                                             can ? 'border-gray-600 bg-gray-800 hover:border-gray-500' :
                                             'border-gray-700 bg-gray-900/50 opacity-50 cursor-not-allowed'
-                                        }" ${!meets || (!can && !sel) ? 'disabled' : ''}>
+                                        }" ${!can && !sel ? 'disabled' : ''}>
                                             <div class="flex justify-between items-start">
                                                 <div class="flex-1">
-                                                    <div class="font-semibold text-sm text-white">
-                                                        ${feat.name} ${!meets && requirementText ? `<span class="text-xs text-red-400">${icons.lock} Requires ${requirementText}</span>` : ''}
-                                                    </div>
+                                                    <div class="font-semibold text-sm text-white">${feat.name}</div>
                                                     <div class="text-xs text-gray-400 mt-1">${feat.description}</div>
-                                                    ${requirementText && meets ? `<div class="text-xs text-green-400 mt-1">✓ Requirements met: ${requirementText}</div>` : ''}
                                                 </div>
                                                 ${sel ? '<div class="ml-2 text-purple-400">✓</div>' : ''}
                                             </div>
@@ -1635,7 +1563,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 </div>
             `));
             
-            // Duplicate proficiencies (now at the very bottom)
+            // Duplicate proficiencies
             if (totalReplacements > 0) {
                 sections.push(section('', `
                     <div class="flex items-center gap-2 mb-4">
@@ -1713,7 +1641,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
             return sections.join('');
         };
 
-        // Event listeners (optimized)
+        // Event listeners
         const attachEventListeners = () => {
             const on = (sel, evt, fn) => document.querySelectorAll(sel).forEach(el => el.addEventListener(evt, fn));
             
@@ -1802,7 +1730,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                     if (origin && !isRacialOriginAvailable(origin)) return;
                 }
                 
-                // Save scroll positions of origin containers before render
+                // Save scroll positions
                 const scrollPositions = {};
                 document.querySelectorAll('.max-h-96.overflow-y-auto').forEach((el, index) => {
                     scrollPositions[index] = el.scrollTop;
@@ -1852,7 +1780,6 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
             
             on('.feat-btn', 'click', e => {
                 const feat = e.currentTarget.dataset.feat;
-                const featType = e.currentTarget.dataset.featType;
                 const c = state.character;
                 const cd = getClassData();
                 let max = 0;
@@ -1861,17 +1788,9 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                     if (parseInt(l) <= c.level) max += ch.count;
                 });
                 
-                // Find the feat data to check requirements
-                let featData = null;
-                if (featType === 'fieldHack') {
-                    featData = gameData.fieldHackFeats.find(f => f.name === feat);
-                } else {
-                    featData = gameData.classFeatsByType[featType]?.find(f => f.name === feat);
-                }
-                
                 if (c.classFeats.includes(feat)) {
                     c.classFeats = c.classFeats.filter(f => f !== feat);
-                } else if (c.classFeats.length < max && canSelectFeat(featData, featType)) {
+                } else if (c.classFeats.length < max) {
                     c.classFeats.push(feat);
                 }
                 render();
