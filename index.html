@@ -44,74 +44,76 @@
 
         // Game data with full property names for readability, INCLUDING FULL ABILITY DESCRIPTIONS
         const gameData = {
-            fieldHackFeats: [
-                {name:'Camouflage',requirements:'Stealth',description:'Create camouflage granting advantage on Stealth in natural terrain'},
-                {name:'Camp Security',requirements:'Perception',description:'Set up camp alarms, advantage on Perception during rest'},
-                {name:'Foraging',requirements:'Survival',description:'Find food/water for 1d4+Wis mod people per day'},
-                {name:'Hide Tracks',requirements:'Stealth',description:'Increase DC to track your party by +5'},
-                {name:'Ranger Tricks',requirements:'Nature',description:'Leave false trails, create natural traps (1d6 damage)'},
-                {name:'Ration Optimization',requirements:'Survival',description:'Make rations last 50% longer'},
-                {name:'Rope Tricks',requirements:'Athletics',description:'Advantage on Athletics checks involving ropes and climbing'},
-                {name:'Tracking',requirements:'Survival',description:'Track creatures, determine numbers and time passed'},
-                {name:'Xenosurvival',requirements:'Science',description:'Identify alien flora/fauna as safe or dangerous'}
-            ],
-            
-            classFeatsByType: {
-                inspiration: [
-                    {name:'Calm and Collected',description:'During long rest, choose Int/Wis/Cha. Inspired characters gain advantage on chosen save'},
-                    {name:'Clear Focus',description:'During long rest, choose a skill. Inspired characters gain advantage on that skill'},
-                    {name:'Coordinated Fire',description:'After you hit, bonus action to grant inspired ally advantage on next attack vs same target'},
-                    {name:'Defensive Motivation',description:'Inspired characters gain +1 AC'},
-                    {name:'Enduring Inspirations',description:'At combat start, inspired characters gain tension die worth of Inspire HP'},
-                    {name:'Grim Resolve',description:'When inspired character loses last Inspire HP, gain resistance to physical damage until next turn'},
-                    {name:'Hard Days Night',description:'Inspired characters reduce exhaustion from environment/exertion by 1 level (min 1)'},
-                    {name:'Quippy Comebacks',description:'Once per Diplomatic Function, inspired characters halve DP loss from failed checks'},
-                    {name:'Skillful Explanations',description:'Once per short rest, allow inspired character to re-roll failed skill check you are proficient in'}
-                ],
-                modification: [
-                    {name:'Armorer',description:'During long rest, grant one armor +1 AC until next rest'},
-                    {name:'Chem Thrower',description:'During long rest, grant line/cone weapon +5m range'},
-                    {name:'Comms Tech',description:'Team radio range 20km (not 5km), balloon duration 15d6 hours'},
-                    {name:'Grenadier',description:'Your grenades deal +1d6 damage'},
-                    {name:'Longarm Calibrations',description:'During long rest, grant longarm +1d4 to attack at long range'},
-                    {name:'Minefield Expert',description:'Bury explosives as mines, advantage to spot mines'},
-                    {name:'Montage',description:'Reduce R&D successes needed by half proficiency bonus'},
-                    {name:'Percussive Maintenance',description:'Machines you grant temp HP to heal +1d6 additional temp HP'},
-                    {name:'Sidearm Calibrations',description:'During long rest, grant sidearm +1 to attack and damage'}
-                ],
-                procedure: [
-                    {name:'Biohazard Disposal',description:'Team proficient in Constitution saves vs disease/toxins/viruses'},
-                    {name:'Controlled Stimulants',description:'Use Med Kit to heal 1d4 exhaustion (once per rest per character)'},
-                    {name:'Crash Training',description:'Use Med Kit to revive dead character (DC 25 Medicine, once per round)'},
-                    {name:'Embolism',description:'Melee attack deals 1d3 Constitution damage'},
-                    {name:'Improvised Medicine',description:'Heal without Med Kit but target not proficient with'},
-                    {name:'Pharmaceuticals',description:'Heal 1d4 Int/Wis/Cha damage during short rest'},
-                    {name:'Sedatives',description:'Melee attack causes unconsciousness (Con save or 1d6 fatigue levels)'},
-                    {name:'Urgent Care',description:'Replace all healing dice rolled with tension dice'},
-                    {name:'Vital Organ Trauma',description:'Add Wisdom modifier to critical hit damage'}
-                ],
-                discovery: [
-                    {name:'A Moments Thought',description:'During rest, spend Eureka to re-roll failed Int/Wis check'},
-                    {name:'Archaeologist',description:'Action to spend Eureka and find secret rooms, advantage on finding hidden architecture'},
-                    {name:'Astronomer',description:'Bonus action to reduce Stargate activation by 1 round per Eureka'},
-                    {name:'Biologist',description:'Action to spend Eureka points to heal 1d6 per point'},
-                    {name:'Chemist',description:'Research Kit ranged attack deals 1d6 acid per Eureka (increases with level)'},
-                    {name:'Geologist',description:'Reaction to spend Eureka and negate natural cover'},
-                    {name:'Hyper-Focus',description:'Spend Eureka to add tension die to Int/Wis check'},
-                    {name:'Physicist',description:'Spend Eureka to increase weapon range by 50%'},
-                    {name:'Social Sciences',description:'Gain 1 Eureka when losing Determination Points'}
-                ],
-                tactic: [
-                    {name:'Ambush',description:'Team gains advantage on first melee attack after rest'},
-                    {name:'Assault Coordination',description:'Next ranged attack by teammate after you hit deals +1d6'},
-                    {name:'Coordinated Response',description:'Team can use your initiative result'},
-                    {name:'Defensive Posture',description:'Allies within 2m gain +2 AC'},
-                    {name:'Distracting Attacks',description:'Target has disadvantage vs chosen ally not within 2m'},
-                    {name:'Hit and Run',description:'Bonus action to let ally Disengage'},
-                    {name:'Overwatchers',description:'90° overwatch field (not 45°), make 2 attacks'},
-                    {name:'Response Shot',description:'Once per encounter, reaction attack when enemy attacks ally'},
-                    {name:'Rush',description:'Bonus action to let ally Dash'}
-                ]
+fieldHackFeats:[
+{name:'Camouflage',requirements:'Stealth',description:'Using elements of the natural environment, you grant your team advantage on Stealth checks after a short or long rest in an environment.'},
+{name:'Camp Security',requirements:'Perception',description:'Your adept site preparation provides advantage on any Perception checks to notice approaching creatures while taking a short or long rest.'},
+{name:'Foraging',requirements:'Stealth',description:'When in a natural environment you can feed a number of people up to your Proficiency bonus with a single hard (DC 20) Survival check and 1d4 hours of work.'},
+{name:'Hide Tracks',requirements:'Stealth',description:'You travel in back of your team, hiding your tracks. Raise the DC to track your party by your Proficiency bonus or to DC 20 (hard difficulty), whichever result yields a higher DC.'},
+{name:'Ranger Tricks',requirements:'Perception',description:'During a Traversal encounter, if you succeed at a Terrain card\'s Navigation check, you navigate an additional 1d3 cards from the Journey deck instead of 1.'},
+{name:'Ration Optimization',requirements:'',description:'By managing your team\'s rations and preparing meals with clever use of ingredients, you can keep spirits high. Your team members heal 1 DP during a short rest.'},
+{name:'Rope Tricks',requirements:'Stealth',description:'Your expert knots and efficient use of rope allow your entire team to benefit from your Climbing Kit.'},
+{name:'Tracking',requirements:'Perception',description:'You gain advantage on all Survival checks made to track.'},
+{name:'Xenosurvival',requirements:'',description:'Once you have taken a short or long rest in an environment, choose a number of additional characters up to your Proficiency bonus to benefit from your Survivalist ability while in the environment until your next rest.'}
+],
+classFeatsByType:{
+inspiration:[
+{name:'Calm and Collected',description:'During a long rest, choose either Intelligence, Wisdom, or Charisma. Inspired characters gain advantage on the chosen save until your next long rest.'},
+{name:'Clear Focus',description:'During a long rest, choose a skill in which you are proficient. Inspired characters gain advantage on the chosen skill until your next long rest.'},
+{name:'Coordinated Fire',description:'After you hit a target with an attack, you may take a bonus action to grant an inspired character advantage to their next attack roll made before your next turn against the same target.'},
+{name:'Defensive Motivation',description:'Inspired characters gains +1 AC.'},
+{name:'Enduring Inspirations',description:'At the beginning of combat (when Initiative is rolled) each inspired character gains a number of Inspire HP equal to a roll of the tension die. A character cannot have more Inspire HP than the maximum possible result of your Inspire die.'},
+{name:'Grim Resolve',description:'When an inspired character loses their last Inspire HP, they gain resistance to bludgeoning, piercing, and slashing damage until their next turn.'},
+{name:'Hard Days Night',description:'Inspired characters reduce any exhaustion damage they suffer from environmental effects or exertion by 1 level (minimum 1 level). This does not affect attacks that deal exhaustion (such as tranquilizers).'},
+{name:'Quippy Comebacks',description:'Once per Diplomatic Function, inspired characters may halve the amount of DP lost (rounding down) as a result of a failed Diplomatic Action check.'},
+{name:'Skillful Explanations',description:'Once per short rest, when an inspired character fails a skill check that you are proficient in, you may allow the character to re-roll the result.'}
+],
+modification:[
+{name:'Armorer',description:'During a long rest, you may choose one character\'s armor. It gains +1 AC until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional armor.'},
+{name:'Chem Thrower',description:'During a long rest you may choose one weapon with the line or cone quality. It gains +5m to its range until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional weapon.'},
+{name:'Comms Tech',description:'Your team\'s tactical radio equipment has a range of 20km (instead of 5km). In addition, when you launch a communications balloon, its duration increases to 15d6 hours.'},
+{name:'Grenadier',description:'Grenades from your kit deal +1d6 damage when used by you. You may choose this modification multiple times; each time you do your kit\'s grenades deal an additional +1d6 damage when used by you.'},
+{name:'Longarm Calibrations',description:'During a long rest you may choose one character\'s Longarm. It gains a +1d4 to attack rolls against targets at long range until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional weapon.'},
+{name:'Minefield Expert',description:'You can bury an explosive (such as C4 or a claymore mine) just below the dirt rigged to explode when a character enters the space. This process takes 2 minutes. The explosive affects all targets within a 2m radius. A character must succeed at a DC 20 Perception check to spot the mine before triggering it. Additionally, you gain advantage on all Perception checks to spot buried mines.'},
+{name:'Montage',description:'During an episode R&D encounter, reduce the number of successes required by half your Proficiency bonus, to a minimum of 1.'},
+{name:'Percussive Maintenance',description:'When a vehicle you are embarked within has the damaged condition, you can take an action to ignore the damaged condition for a number of rounds equal to a roll of the tension die.'},
+{name:'Sidearm Calibrations',description:'During a long rest you may choose one character\'s sidearm. It provides a +1d4 to attack rolls against targets at short range until your next long rest. You may choose this modification multiple times, each time you do you may apply the bonus to an additional weapon.'}
+],
+procedure:[
+{name:'Biohazard Disposal',description:'You and your team are considered proficient in Constitution saves against diseases, toxins, and viruses. If a character is already proficient in Constitution saves, they gain no benefit from this procedure.'},
+{name:'Controlled Stimulants',description:'As an action, you may use your Med Kit to heal 1d4 levels of exhaustion. A character may not benefit from this ability again until they have taken a long rest.'},
+{name:'Crash Training',description:'You may use a Med Kit to revive a character who has been dead for a number of rounds up to your Proficiency bonus with a successful DC 25 Medicine check. You may attempt this check once per round.'},
+{name:'Embolism',description:'You may use your Med Kit to make a melee attack that deals 1d3 Constitution damage.'},
+{name:'Improvised Medicine',description:'When you do not have a Med Kit, you may still heal friendly targets as if you had a Med Kit but were not proficient with it.'},
+{name:'Pharmaceuticals',description:'You may use your Med Kit to heal a character of 1d4 Intelligence, Wisdom, or Charisma damage during a short rest. A character may not benefit from this ability again until they have taken a long rest.'},
+{name:'Sedatives',description:'You may administer a sedative to a living target as a melee attack using your Med Kit. If successful, the target must succeed at a Constitution save (DC equal to 10 + Proficiency bonus + Wisdom modifier) or suffer 1d6 levels of fatigue. A target brought to 6 levels of fatigue with this ability is unconscious instead of dead.'},
+{name:'Urgent Care',description:'When you heal with a Med Kit, you may choose to replace all the healing dice rolled with the same number of Tension Dice.'},
+{name:'Vital Organ Trauma',description:'When you critically hit, add your Wisdom modifier to the damage dealt.'}
+],
+discovery:[
+{name:'A Moment\'s Thought',description:'Whenever you take a short or long rest you may spend a Eureka point to re-roll an Intelligence or Wisdom skill check to learn information that you failed since your last rest.'},
+{name:'Archaeologist',description:'As an action you can spend a Eureka point to automatically locate any secret chambers or otherwise hidden rooms within a structure no larger than 20m square per Proficiency bonus. This does not indicate how the secret area may be accessed, only that one must exist (or doesn\'t exist) within the area. In addition, you gain advantage on any Perception checks to find hidden elements of architecture such as secret levers, trap triggers, or hidden doors.'},
+{name:'Astronomer',description:'As a bonus action you may reduce the time it takes to activate an astronomical device (including a Stargate) by 1 round per Eureka point spent.'},
+{name:'Biologist',description:'As an action you may spend any number of Eureka points to heal yourself or a character within 1m for 1d6 damage per Eureka point spent.'},
+{name:'Chemist',description:'As an action you may use your Research Kit to make a ranged attack against a target within 5m. If the attack hits, you may spend any number of Eureka points to deal 1d6 acid damage per Eureka point spent. You are proficient with this attack and it uses your Intelligence modifier in place of your Dexterity. This damage increases to 1d8 per Eureka at level 5, 1d10 at level 11, and 1d12 at level 17.'},
+{name:'Geologist',description:'When a friendly character within 5m makes an attack against a target in cover from a natural source (stones, trees, a hill), you may make a reaction and spend a Eureka point to negate the effects of that cover for the duration of the attack.'},
+{name:'Hyper-Focus',description:'You may spend one Eureka point to add the tension die to an Intelligence or Wisdom check. You may declare this use of Eureka after learning the results of the roll.'},
+{name:'Physicist',description:'When you make an attack with a ranged weapon, you may spend a Eureka to increase the weapon\'s range by half (+50%).'},
+{name:'Social Sciences',description:'Whenever you lose any number of wagered Determination Points, you gain one Eureka point.'}
+],
+tactic:[
+{name:'Ambush',description:'You and your team members gain advantage on your first melee attack after any short or long rest.'},
+{name:'Assault Coordination',description:'When you hit a target with a ranged attack, the next successful ranged attack by one of your team members deals +1d6 damage.'},
+{name:'Coordinated Response',description:'When rolling for initiative, your team members may choose (before the rolls are made) to use your initiative result instead of their own.'},
+{name:'Defensive Posture',description:'Add +2 AC to other team members within 2m of you.'},
+{name:'Distracting Attacks',description:'When you deal damage to a single target with an attack, you may choose one friendly character not within 2m of you. The target of your attack suffers disadvantage on all attacks against the chosen character until the start of your next turn.'},
+{name:'Hit and Run',description:'As a bonus action on your turn you may allow a team member to take a Disengage action.'},
+{name:'Overwatchers',description:'During a firefight, when you and your team members take the Overwatch action you cover a 90° field instead of a 45° cone. In addition, you may make two Overwatch attacks (against different targets).'},
+{name:'Response Shot',description:'Once per encounter, you may use your reaction to make a ranged attack against an enemy who makes an attack against a team member other than yourself.'},
+{name:'Rush',description:'As a bonus action on your turn you may allow a team member to take a Dash action.'}
+]
+
+
+                
             },
 
             // Full class ability descriptions
