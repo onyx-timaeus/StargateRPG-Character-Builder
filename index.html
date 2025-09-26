@@ -44,76 +44,76 @@
 
         // Game data with full property names for readability, INCLUDING FULL ABILITY DESCRIPTIONS
         const gameData = {
-fieldHackFeats:[
-{name:'Camouflage',requirements:'Stealth',description:'Using elements of the natural environment, you grant your team advantage on Stealth checks after a short or long rest in an environment.'},
-{name:'Camp Security',requirements:'Perception',description:'Your adept site preparation provides advantage on any Perception checks to notice approaching creatures while taking a short or long rest.'},
-{name:'Foraging',requirements:'Stealth',description:'When in a natural environment you can feed a number of people up to your Proficiency bonus with a single hard (DC 20) Survival check and 1d4 hours of work.'},
-{name:'Hide Tracks',requirements:'Stealth',description:'You travel in back of your team, hiding your tracks. Raise the DC to track your party by your Proficiency bonus or to DC 20 (hard difficulty), whichever result yields a higher DC.'},
-{name:'Ranger Tricks',requirements:'Perception',description:'During a Traversal encounter, if you succeed at a Terrain card\'s Navigation check, you navigate an additional 1d3 cards from the Journey deck instead of 1.'},
-{name:'Ration Optimization',requirements:'',description:'By managing your team\'s rations and preparing meals with clever use of ingredients, you can keep spirits high. Your team members heal 1 DP during a short rest.'},
-{name:'Rope Tricks',requirements:'Stealth',description:'Your expert knots and efficient use of rope allow your entire team to benefit from your Climbing Kit.'},
-{name:'Tracking',requirements:'Perception',description:'You gain advantage on all Survival checks made to track.'},
-{name:'Xenosurvival',requirements:'',description:'Once you have taken a short or long rest in an environment, choose a number of additional characters up to your Proficiency bonus to benefit from your Survivalist ability while in the environment until your next rest.'}
-],
-classFeatsByType:{
-inspiration:[
-{name:'Calm and Collected',description:'During a long rest, choose either Intelligence, Wisdom, or Charisma. Inspired characters gain advantage on the chosen save until your next long rest.'},
-{name:'Clear Focus',description:'During a long rest, choose a skill in which you are proficient. Inspired characters gain advantage on the chosen skill until your next long rest.'},
-{name:'Coordinated Fire',description:'After you hit a target with an attack, you may take a bonus action to grant an inspired character advantage to their next attack roll made before your next turn against the same target.'},
-{name:'Defensive Motivation',description:'Inspired characters gains +1 AC.'},
-{name:'Enduring Inspirations',description:'At the beginning of combat (when Initiative is rolled) each inspired character gains a number of Inspire HP equal to a roll of the tension die. A character cannot have more Inspire HP than the maximum possible result of your Inspire die.'},
-{name:'Grim Resolve',description:'When an inspired character loses their last Inspire HP, they gain resistance to bludgeoning, piercing, and slashing damage until their next turn.'},
-{name:'Hard Days Night',description:'Inspired characters reduce any exhaustion damage they suffer from environmental effects or exertion by 1 level (minimum 1 level). This does not affect attacks that deal exhaustion (such as tranquilizers).'},
-{name:'Quippy Comebacks',description:'Once per Diplomatic Function, inspired characters may halve the amount of DP lost (rounding down) as a result of a failed Diplomatic Action check.'},
-{name:'Skillful Explanations',description:'Once per short rest, when an inspired character fails a skill check that you are proficient in, you may allow the character to re-roll the result.'}
-],
-modification:[
-{name:'Armorer',description:'During a long rest, you may choose one character\'s armor. It gains +1 AC until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional armor.'},
-{name:'Chem Thrower',description:'During a long rest you may choose one weapon with the line or cone quality. It gains +5m to its range until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional weapon.'},
-{name:'Comms Tech',description:'Your team\'s tactical radio equipment has a range of 20km (instead of 5km). In addition, when you launch a communications balloon, its duration increases to 15d6 hours.'},
-{name:'Grenadier',description:'Grenades from your kit deal +1d6 damage when used by you. You may choose this modification multiple times; each time you do your kit\'s grenades deal an additional +1d6 damage when used by you.'},
-{name:'Longarm Calibrations',description:'During a long rest you may choose one character\'s Longarm. It gains a +1d4 to attack rolls against targets at long range until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional weapon.'},
-{name:'Minefield Expert',description:'You can bury an explosive (such as C4 or a claymore mine) just below the dirt rigged to explode when a character enters the space. This process takes 2 minutes. The explosive affects all targets within a 2m radius. A character must succeed at a DC 20 Perception check to spot the mine before triggering it. Additionally, you gain advantage on all Perception checks to spot buried mines.'},
-{name:'Montage',description:'During an episode R&D encounter, reduce the number of successes required by half your Proficiency bonus, to a minimum of 1.'},
-{name:'Percussive Maintenance',description:'When a vehicle you are embarked within has the damaged condition, you can take an action to ignore the damaged condition for a number of rounds equal to a roll of the tension die.'},
-{name:'Sidearm Calibrations',description:'During a long rest you may choose one character\'s sidearm. It provides a +1d4 to attack rolls against targets at short range until your next long rest. You may choose this modification multiple times, each time you do you may apply the bonus to an additional weapon.'}
-],
-procedure:[
-{name:'Biohazard Disposal',description:'You and your team are considered proficient in Constitution saves against diseases, toxins, and viruses. If a character is already proficient in Constitution saves, they gain no benefit from this procedure.'},
-{name:'Controlled Stimulants',description:'As an action, you may use your Med Kit to heal 1d4 levels of exhaustion. A character may not benefit from this ability again until they have taken a long rest.'},
-{name:'Crash Training',description:'You may use a Med Kit to revive a character who has been dead for a number of rounds up to your Proficiency bonus with a successful DC 25 Medicine check. You may attempt this check once per round.'},
-{name:'Embolism',description:'You may use your Med Kit to make a melee attack that deals 1d3 Constitution damage.'},
-{name:'Improvised Medicine',description:'When you do not have a Med Kit, you may still heal friendly targets as if you had a Med Kit but were not proficient with it.'},
-{name:'Pharmaceuticals',description:'You may use your Med Kit to heal a character of 1d4 Intelligence, Wisdom, or Charisma damage during a short rest. A character may not benefit from this ability again until they have taken a long rest.'},
-{name:'Sedatives',description:'You may administer a sedative to a living target as a melee attack using your Med Kit. If successful, the target must succeed at a Constitution save (DC equal to 10 + Proficiency bonus + Wisdom modifier) or suffer 1d6 levels of fatigue. A target brought to 6 levels of fatigue with this ability is unconscious instead of dead.'},
-{name:'Urgent Care',description:'When you heal with a Med Kit, you may choose to replace all the healing dice rolled with the same number of Tension Dice.'},
-{name:'Vital Organ Trauma',description:'When you critically hit, add your Wisdom modifier to the damage dealt.'}
-],
-discovery:[
-{name:'A Moment\'s Thought',description:'Whenever you take a short or long rest you may spend a Eureka point to re-roll an Intelligence or Wisdom skill check to learn information that you failed since your last rest.'},
-{name:'Archaeologist',description:'As an action you can spend a Eureka point to automatically locate any secret chambers or otherwise hidden rooms within a structure no larger than 20m square per Proficiency bonus. This does not indicate how the secret area may be accessed, only that one must exist (or doesn\'t exist) within the area. In addition, you gain advantage on any Perception checks to find hidden elements of architecture such as secret levers, trap triggers, or hidden doors.'},
-{name:'Astronomer',description:'As a bonus action you may reduce the time it takes to activate an astronomical device (including a Stargate) by 1 round per Eureka point spent.'},
-{name:'Biologist',description:'As an action you may spend any number of Eureka points to heal yourself or a character within 1m for 1d6 damage per Eureka point spent.'},
-{name:'Chemist',description:'As an action you may use your Research Kit to make a ranged attack against a target within 5m. If the attack hits, you may spend any number of Eureka points to deal 1d6 acid damage per Eureka point spent. You are proficient with this attack and it uses your Intelligence modifier in place of your Dexterity. This damage increases to 1d8 per Eureka at level 5, 1d10 at level 11, and 1d12 at level 17.'},
-{name:'Geologist',description:'When a friendly character within 5m makes an attack against a target in cover from a natural source (stones, trees, a hill), you may make a reaction and spend a Eureka point to negate the effects of that cover for the duration of the attack.'},
-{name:'Hyper-Focus',description:'You may spend one Eureka point to add the tension die to an Intelligence or Wisdom check. You may declare this use of Eureka after learning the results of the roll.'},
-{name:'Physicist',description:'When you make an attack with a ranged weapon, you may spend a Eureka to increase the weapon\'s range by half (+50%).'},
-{name:'Social Sciences',description:'Whenever you lose any number of wagered Determination Points, you gain one Eureka point.'}
-],
-tactic:[
-{name:'Ambush',description:'You and your team members gain advantage on your first melee attack after any short or long rest.'},
-{name:'Assault Coordination',description:'When you hit a target with a ranged attack, the next successful ranged attack by one of your team members deals +1d6 damage.'},
-{name:'Coordinated Response',description:'When rolling for initiative, your team members may choose (before the rolls are made) to use your initiative result instead of their own.'},
-{name:'Defensive Posture',description:'Add +2 AC to other team members within 2m of you.'},
-{name:'Distracting Attacks',description:'When you deal damage to a single target with an attack, you may choose one friendly character not within 2m of you. The target of your attack suffers disadvantage on all attacks against the chosen character until the start of your next turn.'},
-{name:'Hit and Run',description:'As a bonus action on your turn you may allow a team member to take a Disengage action.'},
-{name:'Overwatchers',description:'During a firefight, when you and your team members take the Overwatch action you cover a 90° field instead of a 45° cone. In addition, you may make two Overwatch attacks (against different targets).'},
-{name:'Response Shot',description:'Once per encounter, you may use your reaction to make a ranged attack against an enemy who makes an attack against a team member other than yourself.'},
-{name:'Rush',description:'As a bonus action on your turn you may allow a team member to take a Dash action.'}
-]
-
-
-                
+            // Field Hack feats with requirements - ALL require Survivalist ability (Scout class)
+            fieldHackFeats:[
+                {name:'Camouflage',requirements:'Stealth',baseRequirement:'Survivalist',description:'Using elements of the natural environment, you grant your team advantage on Stealth checks after a short or long rest in an environment.'},
+                {name:'Camp Security',requirements:'Perception',baseRequirement:'Survivalist',description:'Your adept site preparation provides advantage on any Perception checks to notice approaching creatures while taking a short or long rest.'},
+                {name:'Foraging',requirements:'Stealth',baseRequirement:'Survivalist',description:'When in a natural environment you can feed a number of people up to your Proficiency bonus with a single hard (DC 20) Survival check and 1d4 hours of work.'},
+                {name:'Hide Tracks',requirements:'Stealth',baseRequirement:'Survivalist',description:'You travel in back of your team, hiding your tracks. Raise the DC to track your party by your Proficiency bonus or to DC 20 (hard difficulty), whichever result yields a higher DC.'},
+                {name:'Ranger Tricks',requirements:'',baseRequirement:'Survivalist',description:'During a Traversal encounter, if you succeed at a Terrain card\'s Navigation check, you navigate an additional 1d3 cards from the Journey deck instead of 1.'},
+                {name:'Ration Optimization',requirements:'',baseRequirement:'Survivalist',description:'By managing your team\'s rations and preparing meals with clever use of ingredients, you can keep spirits high. Your team members heal 1 DP during a short rest.'},
+                {name:'Rope Tricks',requirements:'Stealth',baseRequirement:'Survivalist',description:'Your expert knots and efficient use of rope allow your entire team to benefit from your Climbing Kit.'},
+                {name:'Tracking',requirements:'Perception',baseRequirement:'Survivalist',description:'You gain advantage on all Survival checks made to track.'},
+                {name:'Xenosurvival',requirements:'Constitution 13+',baseRequirement:'Survivalist',description:'Once you have taken a short or long rest in an environment, choose a number of additional characters up to your Proficiency bonus to benefit from your Survivalist ability while in the environment until your next rest.'}
+            ],
+            
+            // Class feats by type with requirements from the rules
+            classFeatsByType:{
+                inspiration:[
+                    {name:'Calm and Collected',requirements:'',baseRequirement:'Inspire',description:'During a long rest, choose either Intelligence, Wisdom, or Charisma. Inspired characters gain advantage on the chosen save until your next long rest.'},
+                    {name:'Clear Focus',requirements:'',baseRequirement:'Inspire',description:'During a long rest, choose a skill in which you are proficient. Inspired characters gain advantage on the chosen skill until your next long rest.'},
+                    {name:'Coordinated Fire',requirements:'',baseRequirement:'Inspire',description:'After you hit a target with an attack, you may take a bonus action to grant an inspired character advantage to their next attack roll made before your next turn against the same target.'},
+                    {name:'Defensive Motivation',requirements:'',baseRequirement:'Inspire',description:'Inspired characters gains +1 AC.'},
+                    {name:'Enduring Inspirations',requirements:'',baseRequirement:'Inspire',description:'At the beginning of combat (when Initiative is rolled) each inspired character gains a number of Inspire HP equal to a roll of the tension die. A character cannot have more Inspire HP than the maximum possible result of your Inspire die.'},
+                    {name:'Grim Resolve',requirements:'',baseRequirement:'Inspire',description:'When an inspired character loses their last Inspire HP, they gain resistance to bludgeoning, piercing, and slashing damage until their next turn.'},
+                    {name:'Hard Days Night',requirements:'',baseRequirement:'Inspire',description:'Inspired characters reduce any exhaustion damage they suffer from environmental effects or exertion by 1 level (minimum 1 level). This does not affect attacks that deal exhaustion (such as tranquilizers).'},
+                    {name:'Quippy Comebacks',requirements:'',baseRequirement:'Inspire',description:'Once per Diplomatic Function, inspired characters may halve the amount of DP lost (rounding down) as a result of a failed Diplomatic Action check.'},
+                    {name:'Skillful Explanations',requirements:'',baseRequirement:'Inspire',description:'Once per short rest, when an inspired character fails a skill check that you are proficient in, you may allow the character to re-roll the result.'}
+                ],
+                modification:[
+                    {name:'Armorer',requirements:'',baseRequirement:'Jury Rig',description:'During a long rest, you may choose one character\'s armor. It gains +1 AC until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional armor.'},
+                    {name:'Chem Thrower',requirements:'',baseRequirement:'Jury Rig',description:'During a long rest you may choose one weapon with the line or cone quality. It gains +5m to its range until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional weapon.'},
+                    {name:'Comms Tech',requirements:'',baseRequirement:'Jury Rig',description:'Your team\'s tactical radio equipment has a range of 20km (instead of 5km). In addition, when you launch a communications balloon, its duration increases to 15d6 hours.'},
+                    {name:'Grenadier',requirements:'',baseRequirement:'Jury Rig',description:'Grenades from your kit deal +1d6 damage when used by you. You may choose this modification multiple times; each time you do your kit\'s grenades deal an additional +1d6 damage when used by you.'},
+                    {name:'Longarm Calibrations',requirements:'',baseRequirement:'Jury Rig',description:'During a long rest you may choose one character\'s Longarm. It gains a +1d4 to attack rolls against targets at long range until your next long rest. You may choose this modification multiple times; each time you do you may apply the bonus to an additional weapon.'},
+                    {name:'Minefield Expert',requirements:'Explosives',baseRequirement:'Jury Rig',description:'You can bury an explosive (such as C4 or a claymore mine) just below the dirt rigged to explode when a character enters the space. This process takes 2 minutes. The explosive affects all targets within a 2m radius. A character must succeed at a DC 20 Perception check to spot the mine before triggering it. Additionally, you gain advantage on all Perception checks to spot buried mines.'},
+                    {name:'Montage',requirements:'',baseRequirement:'Jury Rig',description:'During an episode R&D encounter, reduce the number of successes required by half your Proficiency bonus, to a minimum of 1.'},
+                    {name:'Percussive Maintenance',requirements:'',baseRequirement:'Jury Rig',description:'When a vehicle you are embarked within has the damaged condition, you can take an action to ignore the damaged condition for a number of rounds equal to a roll of the tension die.'},
+                    {name:'Sidearm Calibrations',requirements:'',baseRequirement:'Jury Rig',description:'During a long rest you may choose one character\'s sidearm. It provides a +1d4 to attack rolls against targets at short range until your next long rest. You may choose this modification multiple times, each time you do you may apply the bonus to an additional weapon.'}
+                ],
+                procedure:[
+                    {name:'Biohazard Disposal',requirements:'',baseRequirement:'First Aid',description:'You and your team are considered proficient in Constitution saves against diseases, toxins, and viruses. If a character is already proficient in Constitution saves, they gain no benefit from this procedure.'},
+                    {name:'Controlled Stimulants',requirements:'',baseRequirement:'First Aid',description:'As an action, you may use your Med Kit to heal 1d4 levels of exhaustion. A character may not benefit from this ability again until they have taken a long rest.'},
+                    {name:'Crash Training',requirements:'',baseRequirement:'First Aid',description:'You may use a Med Kit to revive a character who has been dead for a number of rounds up to your Proficiency bonus with a successful DC 25 Medicine check. You may attempt this check once per round.'},
+                    {name:'Embolism',requirements:'',baseRequirement:'First Aid',description:'You may use your Med Kit to make a melee attack that deals 1d3 Constitution damage.'},
+                    {name:'Improvised Medicine',requirements:'',baseRequirement:'First Aid',description:'When you do not have a Med Kit, you may still heal friendly targets as if you had a Med Kit but were not proficient with it.'},
+                    {name:'Pharmaceuticals',requirements:'',baseRequirement:'First Aid',description:'You may use your Med Kit to heal a character of 1d4 Intelligence, Wisdom, or Charisma damage during a short rest. A character may not benefit from this ability again until they have taken a long rest.'},
+                    {name:'Sedatives',requirements:'',baseRequirement:'First Aid',description:'You may administer a sedative to a living target as a melee attack using your Med Kit. If successful, the target must succeed at a Constitution save (DC equal to 10 + Proficiency bonus + Wisdom modifier) or suffer 1d6 levels of fatigue. A target brought to 6 levels of fatigue with this ability is unconscious instead of dead.'},
+                    {name:'Urgent Care',requirements:'',baseRequirement:'First Aid',description:'When you heal with a Med Kit, you may choose to replace all the healing dice rolled with the same number of Tension Dice.'},
+                    {name:'Vital Organ Trauma',requirements:'',baseRequirement:'First Aid',description:'When you critically hit, add your Wisdom modifier to the damage dealt.'}
+                ],
+                discovery:[
+                    {name:'A Moment\'s Thought',requirements:'',baseRequirement:'Eureka',description:'Whenever you take a short or long rest you may spend a Eureka point to re-roll an Intelligence or Wisdom skill check to learn information that you failed since your last rest.'},
+                    {name:'Archaeologist',requirements:'Culture',baseRequirement:'Eureka',description:'As an action you can spend a Eureka point to automatically locate any secret chambers or otherwise hidden rooms within a structure no larger than 20m square per Proficiency bonus. This does not indicate how the secret area may be accessed, only that one must exist (or doesn\'t exist) within the area. In addition, you gain advantage on any Perception checks to find hidden elements of architecture such as secret levers, trap triggers, or hidden doors.'},
+                    {name:'Astronomer',requirements:'Science',baseRequirement:'Eureka',description:'As a bonus action you may reduce the time it takes to activate an astronomical device (including a Stargate) by 1 round per Eureka point spent.'},
+                    {name:'Biologist',requirements:'Medicine',baseRequirement:'Eureka',description:'As an action you may spend any number of Eureka points to heal yourself or a character within 1m for 1d6 damage per Eureka point spent.'},
+                    {name:'Chemist',requirements:'Science',baseRequirement:'Eureka',description:'As an action you may use your Research Kit to make a ranged attack against a target within 5m. If the attack hits, you may spend any number of Eureka points to deal 1d6 acid damage per Eureka point spent. You are proficient with this attack and it uses your Intelligence modifier in place of your Dexterity. This damage increases to 1d8 per Eureka at level 5, 1d10 at level 11, and 1d12 at level 17.'},
+                    {name:'Geologist',requirements:'Science',baseRequirement:'Eureka',description:'When a friendly character within 5m makes an attack against a target in cover from a natural source (stones, trees, a hill), you may make a reaction and spend a Eureka point to negate the effects of that cover for the duration of the attack.'},
+                    {name:'Hyper-Focus',requirements:'',baseRequirement:'Eureka',description:'You may spend one Eureka point to add the tension die to an Intelligence or Wisdom check. You may declare this use of Eureka after learning the results of the roll.'},
+                    {name:'Physicist',requirements:'Science',baseRequirement:'Eureka',description:'When you make an attack with a ranged weapon, you may spend a Eureka to increase the weapon\'s range by half (+50%).'},
+                    {name:'Social Sciences',requirements:'Culture',baseRequirement:'Eureka',description:'Whenever you lose any number of wagered Determination Points, you gain one Eureka point.'}
+                ],
+                tactic:[
+                    {name:'Ambush',requirements:'',description:'You and your team members gain advantage on your first melee attack after any short or long rest.'},
+                    {name:'Assault Coordination',requirements:'',description:'When you hit a target with a ranged attack, the next successful ranged attack by one of your team members deals +1d6 damage.'},
+                    {name:'Coordinated Response',requirements:'',description:'When rolling for initiative, your team members may choose (before the rolls are made) to use your initiative result instead of their own.'},
+                    {name:'Defensive Posture',requirements:'',description:'Add +2 AC to other team members within 2m of you.'},
+                    {name:'Distracting Attacks',requirements:'',description:'When you deal damage to a single target with an attack, you may choose one friendly character not within 2m of you. The target of your attack suffers disadvantage on all attacks against the chosen character until the start of your next turn.'},
+                    {name:'Hit and Run',requirements:'',description:'As a bonus action on your turn you may allow a team member to take a Disengage action.'},
+                    {name:'Overwatchers',requirements:'',description:'During a firefight, when you and your team members take the Overwatch action you cover a 90° field instead of a 45° cone. In addition, you may make two Overwatch attacks (against different targets).'},
+                    {name:'Response Shot',requirements:'',description:'Once per encounter, you may use your reaction to make a ranged attack against an enemy who makes an attack against a team member other than yourself.'},
+                    {name:'Rush',requirements:'',description:'As a bonus action on your turn you may allow a team member to take a Dash action.'}
+                ]
             },
 
             // Full class ability descriptions
@@ -682,9 +682,52 @@ tactic:[
             return Array.from(skills);
         };
 
-        const canSelectFieldHack = feat => {
-            if (state.character.class !== 'Scout' || !feat.requirements) return true;
-            return getFinalSkillProficiencies().includes(feat.requirements);
+        // Enhanced feat requirement checking
+        const canSelectFeat = (feat, featType) => {
+            const c = state.character;
+            const finalSkills = getFinalSkillProficiencies();
+            const cd = getClassData();
+            const finalScores = getFinalAbilityScores();
+            
+            // Check base class ability requirements
+            if (feat.baseRequirement) {
+                if (feat.baseRequirement === 'Inspire' && c.class !== 'Diplomat') return false;
+                if (feat.baseRequirement === 'Jury Rig' && c.class !== 'Engineer') return false;
+                if (feat.baseRequirement === 'First Aid' && c.class !== 'Medic') return false;
+                if (feat.baseRequirement === 'Eureka' && c.class !== 'Scientist') return false;
+                if (feat.baseRequirement === 'Survivalist' && c.class !== 'Scout') return false;
+                if (feat.baseRequirement === 'Tactical Flexibility' && c.class !== 'Soldier') return false;
+            }
+            
+            // Legacy check for feat types without explicit base requirements
+            if (!feat.baseRequirement) {
+                if (featType === 'inspiration' && c.class !== 'Diplomat') return false;
+                if (featType === 'modification' && c.class !== 'Engineer') return false;
+                if (featType === 'procedure' && c.class !== 'Medic') return false;
+                if (featType === 'discovery' && c.class !== 'Scientist') return false;
+                if (featType === 'fieldHack' && c.class !== 'Scout') return false;
+                if (featType === 'tactic' && c.class !== 'Soldier') return false;
+            }
+            
+            // Check additional requirements
+            if (feat.requirements && feat.requirements !== '') {
+                // Check for ability score requirements (e.g., "Constitution 13+")
+                if (feat.requirements.includes('13+')) {
+                    const ability = feat.requirements.split(' ')[0].toLowerCase();
+                    if (finalScores[ability] < 13) return false;
+                }
+                // Check if it's a skill requirement
+                else if (gameData.skills.includes(feat.requirements)) {
+                    return finalSkills.includes(feat.requirements);
+                }
+                // Check if it's a tool requirement
+                else if (gameData.tools.includes(feat.requirements)) {
+                    // Check class tool proficiencies
+                    return cd?.proficiencies?.tools?.includes(feat.requirements) || false;
+                }
+            }
+            
+            return true;
         };
 
         const getAbilityBonuses = ability => {
@@ -1128,7 +1171,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 sections.push(section(rd.proficiencies.skills.type === 'choice' ? `Choose ${rd.proficiencies.skills.count} Skill Proficienc${rd.proficiencies.skills.count > 1 ? 'ies' : 'y'}` : 'Skill Proficiencies', skillContent));
             }
             
-            // Origins with improved proficiency display
+            // Origins with improved display including descriptions
             sections.push(section('Select Origins (Choose 2 from different categories)', `
                 ${['biome', 'background'].map(type => `
                     <div class="mb-4">
@@ -1187,6 +1230,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                                             ${o.isHomebrew ? '<span class="text-yellow-300 text-xs">(Homebrew)</span>' : ''}
                                             ${notAvailable ? `<span class="text-xs text-red-400">(Only for ${o.restrictedTo.join(', ')})</span>` : ''}
                                         </div>
+                                        ${o.description ? `<div class="text-xs text-gray-300 italic mt-1 mb-2">${o.description}</div>` : ''}
                                         <div class="text-xs text-green-400 mt-1">
                                             ${o.attribute !== 'None' && o.attribute !== 'choice' && o.attribute ? o.attribute : ''}
                                             ${o.attribute === 'choice' && o.attributeOptions ? `Choose: ${o.attributeOptions.join(' OR ')}` : ''}
@@ -1328,7 +1372,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 }).join('')));
             }
             
-            // Class selection - Fixed colors
+            // Class selection
             sections.push(section('Select Class', `
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                     ${Object.entries(gameData.classes).map(([name, data]) => `
@@ -1422,7 +1466,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                 `));
             }
             
-            // Class feats
+            // Class feats - Enhanced with proper requirement checking
             if (cd?.featChoices) {
                 let req = 0, type = null;
                 Object.entries(cd.featChoices).forEach(([l, ch]) => {
@@ -1447,9 +1491,21 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                                 ${feats.map(feat => {
                                     const sel = c.classFeats.includes(feat.name);
                                     const can = c.classFeats.length < req && !sel;
-                                    const meets = canSelectFieldHack(feat);
+                                    const meets = canSelectFeat(feat, type);
+                                    
+                                    // Build requirement display text
+                                    let requirementText = '';
+                                    if (feat.baseRequirement) {
+                                        requirementText = feat.baseRequirement;
+                                        if (feat.requirements && feat.requirements !== '') {
+                                            requirementText += `, ${feat.requirements}`;
+                                        }
+                                    } else if (feat.requirements && feat.requirements !== '') {
+                                        requirementText = feat.requirements;
+                                    }
+                                    
                                     return `
-                                        <button data-feat="${feat.name}" class="feat-btn w-full text-left p-3 rounded border transition-all ${
+                                        <button data-feat="${feat.name}" data-feat-type="${type}" class="feat-btn w-full text-left p-3 rounded border transition-all ${
                                             sel ? 'border-purple-500 bg-purple-500/20' :
                                             !meets ? 'border-red-700 bg-red-900/20 opacity-60 cursor-not-allowed' :
                                             can ? 'border-gray-600 bg-gray-800 hover:border-gray-500' :
@@ -1458,10 +1514,10 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                                             <div class="flex justify-between items-start">
                                                 <div class="flex-1">
                                                     <div class="font-semibold text-sm text-white">
-                                                        ${feat.name} ${!meets ? `<span class="text-xs text-red-400">${icons.lock} Requires ${feat.requirements}</span>` : ''}
+                                                        ${feat.name} ${!meets && requirementText ? `<span class="text-xs text-red-400">${icons.lock} Requires ${requirementText}</span>` : ''}
                                                     </div>
                                                     <div class="text-xs text-gray-400 mt-1">${feat.description}</div>
-                                                    ${feat.requirements && meets ? `<div class="text-xs text-green-400 mt-1">✓ Requirement met: ${feat.requirements}</div>` : ''}
+                                                    ${requirementText && meets ? `<div class="text-xs text-green-400 mt-1">✓ Requirements met: ${requirementText}</div>` : ''}
                                                 </div>
                                                 ${sel ? '<div class="ml-2 text-purple-400">✓</div>' : ''}
                                             </div>
@@ -1796,6 +1852,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
             
             on('.feat-btn', 'click', e => {
                 const feat = e.currentTarget.dataset.feat;
+                const featType = e.currentTarget.dataset.featType;
                 const c = state.character;
                 const cd = getClassData();
                 let max = 0;
@@ -1804,9 +1861,17 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
                     if (parseInt(l) <= c.level) max += ch.count;
                 });
                 
+                // Find the feat data to check requirements
+                let featData = null;
+                if (featType === 'fieldHack') {
+                    featData = gameData.fieldHackFeats.find(f => f.name === feat);
+                } else {
+                    featData = gameData.classFeatsByType[featType]?.find(f => f.name === feat);
+                }
+                
                 if (c.classFeats.includes(feat)) {
                     c.classFeats = c.classFeats.filter(f => f !== feat);
-                } else if (c.classFeats.length < max && canSelectFieldHack({name:feat,requirements:gameData.fieldHackFeats.find(f=>f.name===feat)?.requirements})) {
+                } else if (c.classFeats.length < max && canSelectFeat(featData, featType)) {
                     c.classFeats.push(feat);
                 }
                 render();
