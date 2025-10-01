@@ -907,7 +907,7 @@ ${Object.entries(c.abilityScoreImprovements).map(([key, value]) => {
 
 ${c.level === 5 && state.attackSpecialistChoice ? `## BONUS FEAT (Level 5)
 
-• Attack Specialist (${state.attackSpecialistChoice}): +1 to attack and damage rolls` : ''}`;
+- Attack Specialist (${state.attackSpecialistChoice}): +1 to attack and damage rolls` : ''}`;
 
             const blob = new Blob([sheet], {type: 'text/plain'});
             const a = document.createElement('a');
@@ -1162,6 +1162,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `## BONUS FEAT (Level 5)
                                 const disabled = !sel && c.origins.length >= 2;
                                 const notAvailable = !isRacialOriginAvailable(o);
                                 const proficiencyDisplay = getOriginProficiencyDisplay(o);
+                                const displayName = o.name.replace(/ \((Official|Homebrew)\)$/, '');
                                 
                                 return `
                                     <button data-origin="${o.name}" data-origin-type="racial" class="origin-btn p-3 text-left rounded border transition-all ${
@@ -1171,7 +1172,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `## BONUS FEAT (Level 5)
                                         'border-gray-600 bg-gray-800 hover:border-gray-500'
                                     }">
                                         <div class="font-semibold text-sm text-white">
-                                            ${o.name}
+                                            ${displayName}
                                             ${o.isHomebrew ? '<span class="text-yellow-300 text-xs">(Homebrew)</span>' : ''}
                                             ${notAvailable ? `<span class="text-xs text-red-400">(Only for ${o.restrictedTo.join(', ')})</span>` : ''}
                                         </div>
@@ -1207,7 +1208,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `## BONUS FEAT (Level 5)
                         content += `
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    Tau'ri Military (Official) - Choose Basic Training:
+                                    Tau'ri Military - Choose Basic Training:
                                 </label>
                                 <div class="grid grid-cols-3 gap-2">
                                     ${basicTrainingOptions.map(option => `
@@ -1230,7 +1231,7 @@ ${c.level === 5 && state.attackSpecialistChoice ? `## BONUS FEAT (Level 5)
                         content += `
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-300 mb-2">
-                                    ${originName} - Choose one attribute:
+                                    ${originName.replace(/ \((Official|Homebrew)\)$/, '')} - Choose one attribute:
                                 </label>
                                 <div class="grid grid-cols-2 gap-2">
                                     ${origin.attributeOptions.map(attr => `
@@ -1459,17 +1460,6 @@ ${c.level === 5 && state.attackSpecialistChoice ? `## BONUS FEAT (Level 5)
                 }
             }
             
-            // Level 5 Attack Specialist
-            if (c.level === 5) {
-                sections.push(section('Bonus Feat - Attack Specialist (Level 5)', `
-                    <p class="text-sm text-gray-400 mb-3">Choose a weapon type to gain +1 to attack and damage rolls</p>
-                    <select id="attack-specialist" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white">
-                        <option value="">Select weapon type...</option>
-                        ${gameData.weapons.map(w => `<option value="${w}" ${state.attackSpecialistChoice === w ? 'selected' : ''}>${w}</option>`).join('')}
-                    </select>
-                `));
-            }
-            
             // Level 4 ASI
             if (c.level >= 4) {
                 sections.push(section('Level 4 - Ability Score Improvement', `
@@ -1502,6 +1492,17 @@ ${c.level === 5 && state.attackSpecialistChoice ? `## BONUS FEAT (Level 5)
                             </div>
                         </div>
                     </div>
+                `));
+            }
+            
+            // Level 5 Attack Specialist
+            if (c.level === 5) {
+                sections.push(section('Bonus Feat - Attack Specialist (Level 5)', `
+                    <p class="text-sm text-gray-400 mb-3">Choose a weapon type to gain +1 to attack and damage rolls</p>
+                    <select id="attack-specialist" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white">
+                        <option value="">Select weapon type...</option>
+                        ${gameData.weapons.map(w => `<option value="${w}" ${state.attackSpecialistChoice === w ? 'selected' : ''}>${w}</option>`).join('')}
+                    </select>
                 `));
             }
             
